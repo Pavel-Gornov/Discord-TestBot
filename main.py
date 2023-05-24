@@ -2,23 +2,18 @@ import json
 import math
 import multiprocessing
 from random import choice, randint
-from typing import Callable
 
 import discord
 import numexpr
 import requests
 from discord import Option
 from discord.ext import commands
+from typing import Callable
 
-from Token import *
+from storage import *
 
-# Всякое
-settings = {'token': TOKEN, 'bot': Bot_name, 'id': Bot_ID, 'prefix': '|'}
-bot = commands.Bot(command_prefix=settings['prefix'], intents=discord.Intents.all())
+bot = commands.Bot(command_prefix=SETTINGS['prefix'], intents=discord.Intents.all())
 
-g_list = ['Привет', 'Приветствую', 'Рад видеть вас']
-color_codes = [0xff9900, 0xFFF7ED, 0xffffff]
-em = ["🪨", "📜", "✂"]
 json_data = {}
 
 
@@ -57,9 +52,9 @@ async def bal(ctx, user: Option(discord.Member, description='Участник с
     await ctx.respond(embed=embed)
 
 
-@bot.slash_command(name='таблица_лидеров', description='В разработке', guild_ids=guild_ids)
+@bot.slash_command(name='таблица-лидеров', description='В разработке', guild_ids=guild_ids)
 async def lb(ctx):
-    embed = discord.Embed(colour=color_codes[1])
+    embed = discord.Embed(colour=COLOR_CODES[1])
     embed.set_author(name="Таблица лидеров", icon_url=bot.user.avatar.url)
     s = ""
     data = sorted(json_data.items(), key=lambda x: x[1], reverse=True)
@@ -104,7 +99,7 @@ async def bal_(ctx, user_id=None):
 
 @bot.command(aliases=["лидеры", "лид", "lb", "табл", "leaderboard"])
 async def lb_(ctx):
-    embed = discord.Embed(colour=color_codes[1])
+    embed = discord.Embed(colour=COLOR_CODES[1])
     embed.set_author(name="Таблица лидеров", icon_url=bot.user.avatar.url)
     s = ""
     data = sorted(json_data.items(), key=lambda x: x[1], reverse=True)
@@ -131,7 +126,7 @@ def api(tag, title):
     elif tag == "fox":
         response = requests.get("https://randomfox.ca/floof")
         json_res = json.loads(response.text)["image"]
-    embed = discord.Embed(color=color_codes[1], title=title)
+    embed = discord.Embed(color=COLOR_CODES[1], title=title)
     embed.set_image(url=json_res)
     return embed
 
@@ -146,7 +141,7 @@ def rps_results(ch1, ch2):
 
 
 def rps_results_embed(user_chose, bot_choice, random=False):
-    embed = discord.Embed(colour=color_codes[1], title="Результаты:")
+    embed = discord.Embed(colour=COLOR_CODES[1], title="Результаты:")
     s = ""
     if random:
         s = " (выбран случайно)"
@@ -170,6 +165,7 @@ def run_until(seconds: int, func: Callable, *args):
 # События
 @bot.event
 async def on_ready():
+    await bot.change_presence(activity=discord.Game("Discord"))
     print(f'{bot.user.name} запустился и готов к работе!')
 
 
@@ -198,7 +194,7 @@ async def __test(ctx):
 async def avatar(ctx, user: Option(discord.Member, description='Участник сервера', required=False),
                  visible: Option(str, description='Отображать для всех?', choices=("Да", "Нет"), required=False)):
     author = user if user else ctx.author
-    embed = discord.Embed(color=color_codes[1], title=f'Аватар {author}', description=f"id: {author.id}")
+    embed = discord.Embed(color=COLOR_CODES[1], title=f'Аватар {author}', description=f"id: {author.id}")
     embed.set_image(url=author.avatar.url)
     if visible == "Да":
         await ctx.respond(embed=embed)
@@ -233,7 +229,7 @@ async def rpc(ctx,
               item: Option(str, description='Ваш выбор', choices=("Камень", "Ножницы", "Бумага"), required=True)):
     d = {"Камень": "🪨", "Ножницы": "✂", "Бумага": "📜"}
     user_choice = d[item]
-    bot_choice = choice(em)
+    bot_choice = choice(EMOJIS)
     await ctx.respond(embed=rps_results_embed(user_choice, bot_choice))
 
 
@@ -380,7 +376,7 @@ async def fox_(ctx, *title):
 @bot.command(aliases=["avatar", "ava", "ава", "аватарка"])
 async def avatar_(ctx):
     author = ctx.message.author
-    embed = discord.Embed(color=color_codes[1], title=f'Аватар {author}', description=f"id: {author.id}")
+    embed = discord.Embed(color=COLOR_CODES[1], title=f'Аватар {author}', description=f"id: {author.id}")
     embed.set_image(url=author.avatar.url)
     await ctx.send(embed=embed)
 
@@ -395,20 +391,19 @@ async def me_(ctx, *args):
         await ctx.send(s)
     else:
         print("Nope")
-        # await ctx.send("У вас нет доступа к этой команде")
 
 
 @bot.command(aliases=["hello", "hi", "hey", "привет", "прив", "приветствие"])
 async def hello_(ctx):
     author = ctx.message.author
-    await ctx.send(f'{choice(g_list)}, {author.mention}!')
+    await ctx.send(f'{choice(GREETINGS_LIST)}, {author.mention}!')
 
 
 @bot.command(aliases=["rps", "кмн", "кнб", "rpc"])
 async def rps_(ctx, user_chose=None):
-    bot_choice = choice(em)
+    bot_choice = choice(EMOJIS)
     if not user_chose:
-        user_chose = choice(em)
+        user_chose = choice(EMOJIS)
         await ctx.send(embed=rps_results_embed(user_chose, bot_choice, random=True))
     else:
         if user_chose.lower() in ["к", "r", "rock", "🪨", "камень"]:
@@ -418,7 +413,7 @@ async def rps_(ctx, user_chose=None):
         elif user_chose.lower() in ["н", "s", "scissors", "✂", "ножницы", "✂️"]:
             user_chose = "✂"
         if user_chose not in ["🪨", "📜", "✂"]:
-            user_chose = choice(em)
+            user_chose = choice(EMOJIS)
             await ctx.send(embed=rps_results_embed(user_chose, bot_choice, random=True))
         else:
             await ctx.send(embed=rps_results_embed(user_chose, bot_choice))
@@ -426,15 +421,7 @@ async def rps_(ctx, user_chose=None):
 
 @bot.command(aliases=["http", "error", "hstat" "httpstat", "сеть", "код"])
 async def http_(ctx, num):
-    codes = [100, 101, 102, 103,
-             200, 201, 202, 203, 204, 206, 207,
-             300, 301, 302, 303, 304, 305, 307, 308,
-             400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410,
-             411, 412, 413, 414, 415, 416, 417, 418, 420,
-             421, 422, 423, 424, 425, 426, 429, 431, 444, 450, 451, 497,
-             498, 499, 500, 501, 502, 503, 504, 506, 507, 508, 509, 510,
-             511, 521, 522, 523, 525, 599]
-    if int(num) in codes:
+    if int(num) in REQUEST_CODES:
         await ctx.send(f"https://http.cat/{num}")
     else:
         await ctx.send("Нет такого кода.")
@@ -443,6 +430,6 @@ async def http_(ctx, num):
 if __name__ == "__main__":
     try:
         json_load()
-        bot.run(settings['token'])
+        bot.run(SETTINGS['token'])
     finally:
         json_save()

@@ -1,4 +1,3 @@
-from typing import final
 from Token import *
 
 GREETINGS_LIST: final = ['Привет', 'Приветствую', 'Рад видеть вас']
@@ -12,4 +11,5 @@ REQUEST_CODES: final = [100, 101, 102, 103,
                         421, 422, 423, 424, 425, 426, 429, 431, 444, 450, 451, 497,
                         498, 499, 500, 501, 502, 503, 504, 506, 507, 508, 509, 510,
                         511, 521, 522, 523, 525, 599]
-SETTINGS: final = {'token': TOKEN, 'bot': Bot_name, 'id': Bot_ID, 'prefix': '|'}
+SETTINGS: final = {'token': TOKEN, 'bot': BOT_NAME, 'id': BOT_ID, 'prefix': '|'}
+D: final = {"True": "Выражение Истинно", "False": "Выражение Ложно"}

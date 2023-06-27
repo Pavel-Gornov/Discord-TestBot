@@ -1,20 +1,37 @@
+import datetime
+import json
+import math
+import multiprocessing
 from random import choice
 
 import discord
+import numexpr
 import requests
-import json
 from discord.ext import commands
+from typing import Callable, Optional
 
 from storage import *
 
 
-@commands.command(aliases=["error", "hstat" "httpstat", "сеть", "код"])
-async def http(ctx, num=None):
-    if num:
-        if int(num) in REQUEST_CODES:
-            await ctx.reply(f"https://http.cat/{num}")
-        else:
-            await ctx.reply("Нет такого кода.")
+@commands.command(aliases=["error", "hstat" "httpstat", "сеть", "код", "статус"])
+async def http(ctx, num: Optional[int] = 200):
+    if num in REQUEST_CODES:
+        await ctx.reply(f"https://http.cat/{num}")
+    else:
+        await ctx.reply("Нет такого кода.")
+
+
+@commands.command(aliases=["ava", "ава", "аватарка", "аватар"])
+async def avatar(ctx, user: Optional[discord.Member] = None):
+    author = None
+    if user:
+        author = user
+    else:
+        author = ctx.message.author
+    if author:
+        embed = discord.Embed(color=COLOR_CODES[1], title=f'Аватар {author}', description=f"id: {author.id}")
+        embed.set_image(url=author.avatar.url)
+        await ctx.reply(embed=embed)
 
 
 @commands.command(aliases=["hi", "hey", "привет", "прив", "приветствие"])
@@ -36,14 +53,6 @@ async def me(ctx, *args):
         await ctx.message.delete()
     else:
         print("Nope")
-
-
-@commands.command(aliases=["ava", "ава", "аватарка"])
-async def avatar(ctx):
-    author = ctx.message.author
-    embed = discord.Embed(color=COLOR_CODES[1], title=f'Аватар {author}', description=f"id: {author.id}")
-    embed.set_image(url=author.avatar.url)
-    await ctx.reply(embed=embed)
 
 
 # Камень, ножницы, бумага
@@ -138,3 +147,46 @@ async def fox(ctx, *title):
     else:
         t = "Случайная Лиса"
     await ctx.reply(embed=api("fox", t))
+
+
+@commands.command(aliases=["счёт", "калькулятор", "подсчёт", "к"])
+async def calc(ctx, *args):
+    async with ctx.channel.typing():
+        s = str()
+        for i in args:
+            s += i + " "
+        s = s.replace("π", str(math.pi)).replace("E", str(math.e))
+        res = "Произошла ошибка."
+        try:
+            res = run_until(7, numexpr.evaluate, s)
+            if not res and str(res) != "False":
+                res = "Ответ не был получен"
+            elif str(res) == "True" or str(res) == "False":
+                res = f"Результат: {D[str(res)]}"
+            elif "j" in str(res):
+                res = f"Результат: {res}"
+            else:
+                res = round(float(res), 7)
+                if str(res).split(".")[-1] == "0":
+                    res = int(res)
+                res = f"Результат: {res}"
+        except Exception as e:
+            print(e)
+    await ctx.reply(res)
+
+
+def run_until(seconds: int, func: Callable, *args):
+    """Run a function until timeout in seconds reached."""
+    with multiprocessing.Pool(processes=2) as pool:
+        result = pool.apply_async(func, [*args])
+        try:
+            result.get(timeout=seconds)
+            return result.get()
+        except multiprocessing.TimeoutError:
+            pass
+
+
+def makeDSTimestamp(year, month, day, hour, minute, second, timezone, mode):
+    dt = datetime.datetime(year, month, day, hour, minute, second,
+                           tzinfo=datetime.timezone(datetime.timedelta(hours=timezone)))
+    return f"<t:{int(dt.timestamp())}:{mode[0]}>"

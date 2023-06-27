@@ -1,14 +1,10 @@
-import math
-import multiprocessing
 from random import randint
 
-import numexpr
 from discord import Option
-from typing import Callable
 
 from commands import *
 
-bot = commands.Bot(command_prefix=SETTINGS['prefix'], intents=discord.Intents.all())
+bot = commands.Bot(command_prefix=commands.when_mentioned_or(SETTINGS['prefix']), intents=discord.Intents.all())
 
 json_data = {}
 
@@ -27,9 +23,8 @@ def json_save():
         f.write(json.dumps(json_data, indent=2))
 
 
-@bot.slash_command(name='баланс', description='В разработке', guild_ids=guild_ids)
+@bot.slash_command(name='баланс', description='Баланс пользователя.', guild_ids=GUILD_IDS)
 async def bal(ctx, user: Option(discord.Member, description='Участник сервера', required=False)):
-    print(json_data)
     user = user if user else ctx.author
     embed = discord.Embed(colour=user.colour)
     embed.set_author(name=user.name, icon_url=user.avatar.url)
@@ -48,7 +43,7 @@ async def bal(ctx, user: Option(discord.Member, description='Участник с
     await ctx.respond(embed=embed)
 
 
-@bot.slash_command(name='таблица-лидеров', description='В разработке', guild_ids=guild_ids)
+@bot.slash_command(name='таблица-лидеров', description='В разработке', guild_ids=GUILD_IDS)
 async def lb(ctx):
     embed = discord.Embed(colour=COLOR_CODES[1])
     embed.set_author(name="Таблица лидеров", icon_url=bot.user.avatar.url)
@@ -63,6 +58,25 @@ async def lb(ctx):
         s += "Вас в этом списке нет."
     embed.description = s
     await ctx.respond(embed=embed)
+
+
+@bot.slash_command(name="метка-времени", description="Что-то делает", guild_ids=GUILD_IDS)
+async def time(ctx, year: Option(int, description="Год для даты", required=False) = 1970,
+               month: Option(int, description="Номер месяца года", required=False) = 1,
+               day: Option(int, description="Номер дня месяца", required=False) = 1,
+               hour: Option(int, description="Час дня", required=False) = 0,
+               minute: Option(int, description="Минута часа", required=False) = 0,
+               second: Option(int, description="Секунда минуты", required=False) = 0,
+               timezone: Option(int, description="Временная зона GMT+n", required=False) = 0,
+               mode: Option(str, description="Тип отображения", choices=("R — Оставшееся время",
+                                                                         "d — Короткая запись даты только цифрами",
+                                                                         "D — Дата с подписью месяца словом",
+                                                                         "f — Дата и время",
+                                                                         "F — Полные день недели, дата и время",
+                                                                         "t — Часы и минуты",
+                                                                         "T — Часы, минуты и секунды"),
+                            required=False) = "R"):
+    await ctx.respond(makeDSTimestamp(year, month, day, hour, minute, second, timezone, mode))
 
 
 @bot.command(aliases=["баланс", "бал", "стат", "stat", "bal"])
@@ -110,18 +124,14 @@ async def lb_(ctx):
     await ctx.send(embed=embed)
 
 
-def run_until(seconds: int, func: Callable, *args):
-    """Run a function until timeout in seconds reached."""
-    with multiprocessing.Pool(processes=2) as pool:
-        result = pool.apply_async(func, [*args])
-        try:
-            result.get(timeout=seconds)
-            return result.get()
-        except multiprocessing.TimeoutError:
-            pass
-
-
 # События
+@bot.event
+async def on_connect():
+    if bot.auto_sync_commands:
+        await bot.sync_commands()
+    print(f'{bot.user.name} запускается...')
+
+
 @bot.event
 async def on_ready():
     await bot.change_presence(activity=discord.Game("Discord"))
@@ -132,8 +142,7 @@ async def on_ready():
 async def on_message(message):
     if message.author != bot.user:
         if bot.user.mention in message.content:
-            aut = message.author
-            print(aut.mention)
+            print(message.author.mention)
         if message.content.startswith("t:") and message.author.id in whitelist:
             if message.reference:
                 await message.channel.send(message.content[2:], reference=message.reference)
@@ -144,12 +153,12 @@ async def on_message(message):
 
 
 # /-команды
-@bot.slash_command(name='тест', description='Что-то делает.', guild_ids=guild_ids)
+@bot.slash_command(name='тест', description='Что-то делает.', guild_ids=GUILD_IDS)
 async def test_(ctx):
     await ctx.respond('Успешный тест!')
 
 
-@bot.slash_command(name='аватар', description='Фото профиля пользователя.', guild_ids=guild_ids)
+@bot.slash_command(name='аватар', description='Фото профиля пользователя.', guild_ids=GUILD_IDS)
 async def avatar_(ctx, user: Option(discord.Member, description='Участник сервера', required=False),
                   visible: Option(str, description='Отображать для всех?', choices=("Да", "Нет"), required=False)):
     author = user if user else ctx.author
@@ -161,7 +170,7 @@ async def avatar_(ctx, user: Option(discord.Member, description='Участни�
         await ctx.respond(embed=embed, ephemeral=True)
 
 
-@bot.slash_command(name='img', description='Присылает случайное изображение.', guild_ids=guild_ids)
+@bot.slash_command(name='img', description='Присылает случайное изображение.', guild_ids=GUILD_IDS)
 async def img_(ctx, type: Option(str, description='Тип животного', choices=("Коты", "Собаки", "Лисы"), required=True),
                name: Option(str, description='Название Embed`а с изображением', required=False)):
     try:
@@ -183,7 +192,7 @@ async def img_(ctx, type: Option(str, description='Тип животного', c
         print(e)
 
 
-@bot.slash_command(name='rpc', description='Камень, ножницы, бумага!', guild_ids=guild_ids)
+@bot.slash_command(name='rpc', description='Камень, ножницы, бумага!', guild_ids=GUILD_IDS)
 async def rpc_(ctx,
                item: Option(str, description='Ваш выбор', choices=("Камень", "Ножницы", "Бумага"), required=True)):
     d = {"Камень": "🪨", "Ножницы": "✂", "Бумага": "📜"}
@@ -192,7 +201,7 @@ async def rpc_(ctx,
     await ctx.respond(embed=rps_results_embed(user_choice, bot_choice))
 
 
-@bot.slash_command(name='сообщение', description="Отправка сообщений от лица бота.", guild_ids=guild_ids)
+@bot.slash_command(name='сообщение', description="Отправка сообщений от лица бота.", guild_ids=GUILD_IDS)
 async def massage_(ctx,
                    text: Option(str, description='Ваше сообщение.', required=True),
                    channel_id: Option(str, description='id канала.', required=False)):
@@ -206,7 +215,7 @@ async def massage_(ctx,
 
 
 @bot.slash_command(name='голосование', description="Отправка голосования от лица бота.",
-                   guild_ids=guild_ids)
+                   guild_ids=GUILD_IDS)
 async def massage_(ctx,
                    text: Option(str, description='Текст (";" между строками, "—" между вариантами)', required=True),
                    channel_id: Option(str, description='id канала.', required=False),
@@ -237,7 +246,7 @@ async def massage_(ctx,
             print(e)
 
 
-@bot.slash_command(name='кубик', description='Тупо кубик', guild_ids=guild_ids)
+@bot.slash_command(name='кубик', description='Тупо кубик', guild_ids=GUILD_IDS)
 async def dice_(ctx, num: Option(int, description='Количество граней кубика', required=False)):
     if not num:
         await ctx.respond(randint(1, 6))
@@ -245,8 +254,8 @@ async def dice_(ctx, num: Option(int, description='Количество гран
         await ctx.respond(randint(1, num))
 
 
-@bot.command(aliases=["rand", "random", "randint", "ранд", "случайный", "случ"])
-async def rand_(ctx, *args):
+@bot.command(aliases=["rand", "randint", "ранд", "случайный", "случ"])
+async def random(ctx, *args):
     if args:
         try:
             args2 = [1, 6]
@@ -267,46 +276,18 @@ async def rand_(ctx, *args):
         await ctx.send(randint(1, 6))
 
 
-@bot.command(aliases=["calc", "счёт", "калькулятор", "подсчёт", "к"])
-async def calc_(ctx, *args):
-    s = str()
-    for i in args:
-        s += i + " "
-    s = s.replace("π", str(math.pi))
-    s = s.replace("E", str(math.e))
-    try:
-        res = run_until(7, numexpr.evaluate, s)
-        if str(res) == "True" or str(res) == "False":
-            d = {"True": "Выражение Истинно", "False": "Выражение Ложно"}
-            await ctx.reply(f"Результат: {d[str(res)]}")
-        elif res or res == 0:
-            if "j" in str(res):
-                await ctx.reply(f"Результат: {res}")
-            else:
-                res = round(float(res), 7)
-                if str(res).split(".")[-1] == "0":
-                    res = int(res)
-                await ctx.reply(f"Результат: {res}")
-        else:
-            await ctx.reply(f"Ответ не был получен")
-    except Exception as e:
-        print(e)
-        if str(e) == "int too big to convert":
-            res = run_until(5, eval, s)
-            await ctx.reply(f"Результат: {res}")
-
-
 if __name__ == "__main__":
     try:
         json_load()
+        bot.add_command(calc)
         bot.add_command(http)
         bot.add_command(hello)
         bot.add_command(me)
-        bot.add_command(avatar)
         bot.add_command(rps)
         bot.add_command(cat)
         bot.add_command(dog)
         bot.add_command(fox)
+        bot.add_command(avatar)
         bot.run(SETTINGS['token'])
     finally:
         json_save()

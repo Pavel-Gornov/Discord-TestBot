@@ -1,0 +1,6 @@
+{
+  "command_dice_name": {"en-US": "dice", "ru": "кубик"},
+  "command_dice_description": {"en-US": "simple n-side dice", "ru": "Простой n-гранный кубик"},
+  "command_dice_option_sides_name": {"en-US": "sides", "ru": "грани"},
+  "command_dice_option_sides_description": {"en-US": "Number of sides", "ru": "Количество граней кубика"}
+}

@@ -2,5 +2,17 @@
   "command_dice_name": {"en-US": "dice", "ru": "кубик"},
   "command_dice_description": {"en-US": "simple n-side dice", "ru": "Простой n-гранный кубик"},
   "command_dice_option_sides_name": {"en-US": "sides", "ru": "грани"},
-  "command_dice_option_sides_description": {"en-US": "Number of sides", "ru": "Количество граней кубика"}
+  "command_dice_option_sides_description": {"en-US": "Number of sides", "ru": "Количество граней кубика"},
+
+  "help_help": {"en-US": "Help", "ru": "Вкладка помощи"},
+  "help_no_info": {"en-US": "No Help Message Found... ", "ru": "Информации пока нет..."},
+  "help_no_сategory": {"en-US": "No Category", "ru": "Без категории"},
+  "help_aliases": {"en-US": "Aliases:", "ru": "Способ вызова:"},
+  "help_command": {"en-US": "Command", "ru": "Команда"},
+  "help_command_not_found": {"en-US": "No command called \"{0}\" found.", "ru": "Команда \"{0}\" не найдена."},
+
+  "cogs": {
+    "BaseCommands": {"en-US": "Base Commands", "ru": "Основные команды"},
+    "Test": {"en-US": "Test Commands", "ru": "Тестовые команды"}
+  }
 }

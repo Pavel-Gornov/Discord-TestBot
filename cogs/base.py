@@ -58,10 +58,10 @@ class BaseCommands(commands.Cog):
     async def hello(self, ctx):
         await ctx.send(f'{random.choice(GREETINGS_LIST)}, {ctx.message.author.mention}!')
 
-    @commands.slash_command(name="кубик", name_localizations=LOCALE["command_dice_name"],
-                            description_localizations=LOCALE["command_dice_description"], guild_ids=GUILD_IDS)
-    @option(name="sides", type=int, default=6, name_localizations=LOCALE["command_dice_option_sides_name"],
-            description_localizations=LOCALE["command_dice_option_sides_description"], required=False)
+    @commands.slash_command(name="кубик", name_localizations=LOCAL["command_dice_name"],
+                            description_localizations=LOCAL["command_dice_description"], guild_ids=GUILD_IDS)
+    @option(name="sides", type=int, default=6, name_localizations=LOCAL["command_dice_option_sides_name"],
+            description_localizations=LOCAL["command_dice_option_sides_description"], required=False)
     async def dice_(self, ctx, sides):
         await ctx.respond(random.randint(1, sides))
 
@@ -78,26 +78,26 @@ class BaseCommands(commands.Cog):
         await ctx.reply("Произошла ошибка.")
 
     @commands.command(aliases=["c", "кот", "Кот", "Cat", "🐱"])
-    async def cat(self, ctx, *, arg="Случайный Кот"):
+    async def cat(self, ctx):
         async with ctx.channel.typing():
             response = requests.get("https://api.thecatapi.com/v1/images/search?mime_types=jpg,png")
-            embed = discord.Embed(color=COLOR_CODES["bot"], title=arg)
+            embed = discord.Embed(color=COLOR_CODES["bot"], title="Случайный Кот")
             embed.set_image(url=response.json()[0]["url"])
         await ctx.reply(embed=embed)
 
     @commands.command(aliases=["d", "собака", "Пёс", "Собака", "Dog", "🐶"])
-    async def dog(self, ctx, *, arg="Случайная Собака"):
+    async def dog(self, ctx):
         async with ctx.channel.typing():
             response = requests.get("https://api.thedogapi.com/v1/images/search?mime_types=jpg,png")
-            embed = discord.Embed(color=COLOR_CODES["bot"], title=arg)
+            embed = discord.Embed(color=COLOR_CODES["bot"], title="Случайная Собака")
             embed.set_image(url=response.json()[0]["url"])
         await ctx.reply(embed=embed)
 
     @commands.command(aliases=["лиса", "лис", "Fox", "Лис", "Лиса", "🦊"])
-    async def fox(self, ctx, *, arg="Случайная Лиса"):
+    async def fox(self, ctx):
         async with ctx.channel.typing():
             response = requests.get("https://randomfox.ca/floof")
-            embed = discord.Embed(color=COLOR_CODES["bot"], title=arg)
+            embed = discord.Embed(color=COLOR_CODES["bot"], title="Случайная Лиса")
             embed.set_image(url=response.json()["image"])
         await ctx.reply(embed=embed)
 

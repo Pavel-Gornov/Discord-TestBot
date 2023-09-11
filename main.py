@@ -11,6 +11,113 @@ from storage import *
 bot = commands.Bot(command_prefix=commands.when_mentioned_or(SETTINGS['prefix']), intents=discord.Intents.all())
 
 
+class CustomHelpCommand(commands.HelpCommand):
+    def cog_filter(self, string):
+        for cog in self.context.bot.cogs:
+            if string in LOCAL["cogs"][cog].values():
+                return cog
+        return string
+
+    async def command_callback(self, ctx, *, command=None):
+        if command:
+            command = self.cog_filter(command)
+        await super().command_callback(ctx=ctx, command=command)
+
+    def get_command_signature(self, command):
+        return f"{self.context.clean_prefix}{command.qualified_name} {command.signature}"
+
+    async def send_bot_help(self, mapping):
+        language = self.context.guild.preferred_locale
+        if self.context.guild.preferred_locale not in LANGS:
+            language = DEFULT_LANG
+
+        embed = discord.Embed(title=LOCAL["help_help"][language], colour=COLOR_CODES["bot"])
+        embed.set_thumbnail(url=BOT_ICON_URL)
+        for cog, bot_commands in mapping.items():
+            command_signatures = list()
+            for c in bot_commands:
+                if isinstance(c, discord.ext.commands.Command):
+                    if c.aliases:
+                        command_signatures.append(
+                            f"`{self.context.clean_prefix}{c.qualified_name}`  ({'|'.join(c.aliases)})")
+                    else:
+                        command_signatures.append(f"`{self.context.clean_prefix}{c.qualified_name}`")
+            if command_signatures:
+                cog_name = getattr(cog, "qualified_name", None)
+                if cog_name:
+                    cog_name = LOCAL["cogs"][cog.qualified_name][language]
+                else:
+                    cog_name = LOCAL["help_no_сategory"][language]
+                embed.add_field(name=f"{cog_name}:", value="\n\t".join(command_signatures), inline=False)
+
+        channel = self.get_destination()
+        await channel.send(embed=embed)
+
+    async def send_command_help(self, command):
+        language = self.context.guild.preferred_locale
+        if self.context.guild.preferred_locale not in LANGS:
+            language = DEFULT_LANG
+
+        embed = discord.Embed(title=f"{LOCAL['help_command'][language]} {self.get_command_signature(command)}",
+                              colour=COLOR_CODES["bot"])
+        embed.set_thumbnail(url=BOT_ICON_URL)
+        if command.help:
+            embed.description = command.help
+        else:
+            embed.description = LOCAL["help_no_info"][language]
+        if command.aliases:
+            embed.add_field(name=LOCAL["help_aliases"][language],
+                            value=f'{command.qualified_name}, {", ".join(command.aliases)}',
+                            inline=False)
+
+        await self.get_destination().send(embed=embed)
+
+    # TODO: Добавить группы команд для полноценной работы данной части команды
+    async def send_group_help(self, group):
+        language = self.context.guild.preferred_locale
+        if self.context.guild.preferred_locale not in LANGS:
+            language = DEFULT_LANG
+
+        embed = discord.Embed(title=self.get_command_signature(group), description=group.help, color=COLOR_CODES["bot"])
+        embed.set_thumbnail(url=BOT_ICON_URL)
+
+        filtered_commands = await self.filter_commands(group.commands)
+
+        if filtered_commands:
+            for command in filtered_commands:
+                embed.add_field(name=self.get_command_signature(command),
+                                value=command.help or LOCAL["help_no_info"][language])
+
+        await self.get_destination().send(embed=embed)
+
+    async def send_cog_help(self, cog):
+        language = self.context.guild.preferred_locale
+        if self.context.guild.preferred_locale not in LANGS:
+            language = DEFULT_LANG
+
+        embed = discord.Embed(
+            title=f'{LOCAL["cogs"][cog.qualified_name][language] or LOCAL["help_no_сategory"][language]}:',
+            description=cog.description,
+            color=COLOR_CODES["bot"])
+        embed.set_thumbnail(url=BOT_ICON_URL)
+
+        filtered_commands = await self.filter_commands(cog.get_commands())
+
+        if filtered_commands:
+            for command in filtered_commands:
+                embed.add_field(name=self.get_command_signature(command),
+                                value=command.help or LOCAL["help_no_info"][language])
+
+        await self.get_destination().send(embed=embed)
+
+    def command_not_found(self, string):
+        language = self.context.guild.preferred_locale
+        if self.context.guild.preferred_locale not in LANGS:
+            language = DEFULT_LANG
+
+        return LOCAL["help_command_not_found"][language].format(string)
+
+
 @bot.slash_command(name="метка-времени", description="Что-то делает", guild_ids=GUILD_IDS)
 async def time(ctx, year: Option(int, description="Год для даты", required=False) = 1970,
                month: Option(int, description="Номер месяца года", required=False) = 1,
@@ -179,12 +286,13 @@ async def mnl(ctx, *, arg):
     await ctx.reply(embed=embed)
 
 
-# noinspection PyTypeChecker
 def main():
     for f in os.listdir("./cogs"):
         if f.endswith(".py") and f != "economy.py":
             bot.load_extension("cogs." + f[:-3])
-    print("Модули успешно загружены!")
+
+    bot.help_command = CustomHelpCommand(
+        command_attrs={'name': "help", 'aliases': ["helpme", "помощь", "хелп"], 'help': "Помпощь по командам бота."})
 
     bot.run(SETTINGS['token'])
 

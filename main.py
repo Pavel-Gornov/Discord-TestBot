@@ -2,7 +2,7 @@ import os
 
 import requests
 from discord import Option
-from lib.utils import makeDSTimestamp
+from lib.utils import makeDSTimestamp, get_guild_lang
 from lib import mnl_mod, mnllib
 from discord.ext import commands
 import discord
@@ -27,9 +27,7 @@ class CustomHelpCommand(commands.HelpCommand):
         return f"{self.context.clean_prefix}{command.qualified_name} {command.signature}"
 
     async def send_bot_help(self, mapping):
-        language = self.context.guild.preferred_locale
-        if self.context.guild.preferred_locale not in LANGS:
-            language = DEFULT_LANG
+        language = get_guild_lang(self.context.guild)
 
         embed = discord.Embed(title=LOCAL["help_help"][language], colour=COLOR_CODES["bot"])
         embed.set_thumbnail(url=BOT_ICON_URL)
@@ -39,7 +37,7 @@ class CustomHelpCommand(commands.HelpCommand):
                 if isinstance(c, discord.ext.commands.Command):
                     if c.aliases:
                         command_signatures.append(
-                            f"`{self.context.clean_prefix}{c.qualified_name}`  ({'|'.join(c.aliases)})")
+                            f"`{self.context.clean_prefix}{c.qualified_name}` {c.signature}")
                     else:
                         command_signatures.append(f"`{self.context.clean_prefix}{c.qualified_name}`")
             if command_signatures:
@@ -54,15 +52,13 @@ class CustomHelpCommand(commands.HelpCommand):
         await channel.send(embed=embed)
 
     async def send_command_help(self, command):
-        language = self.context.guild.preferred_locale
-        if self.context.guild.preferred_locale not in LANGS:
-            language = DEFULT_LANG
+        language = get_guild_lang(self.context.guild)
 
         embed = discord.Embed(title=f"{LOCAL['help_command'][language]} {self.get_command_signature(command)}",
                               colour=COLOR_CODES["bot"])
         embed.set_thumbnail(url=BOT_ICON_URL)
         if command.help:
-            embed.description = command.help
+            embed.description = LOCAL[command.help][language]
         else:
             embed.description = LOCAL["help_no_info"][language]
         if command.aliases:
@@ -74,9 +70,7 @@ class CustomHelpCommand(commands.HelpCommand):
 
     # TODO: Добавить группы команд для полноценной работы данной части команды
     async def send_group_help(self, group):
-        language = self.context.guild.preferred_locale
-        if self.context.guild.preferred_locale not in LANGS:
-            language = DEFULT_LANG
+        language = get_guild_lang(self.context.guild)
 
         embed = discord.Embed(title=self.get_command_signature(group), description=group.help, color=COLOR_CODES["bot"])
         embed.set_thumbnail(url=BOT_ICON_URL)
@@ -86,14 +80,13 @@ class CustomHelpCommand(commands.HelpCommand):
         if filtered_commands:
             for command in filtered_commands:
                 embed.add_field(name=self.get_command_signature(command),
-                                value=command.help or LOCAL["help_no_info"][language])
+                                value=LOCAL[command.help][language] if command.help else LOCAL["help_no_info"][
+                                    language])
 
         await self.get_destination().send(embed=embed)
 
     async def send_cog_help(self, cog):
-        language = self.context.guild.preferred_locale
-        if self.context.guild.preferred_locale not in LANGS:
-            language = DEFULT_LANG
+        language = get_guild_lang(self.context.guild)
 
         embed = discord.Embed(
             title=f'{LOCAL["cogs"][cog.qualified_name][language] or LOCAL["help_no_сategory"][language]}:',
@@ -106,14 +99,13 @@ class CustomHelpCommand(commands.HelpCommand):
         if filtered_commands:
             for command in filtered_commands:
                 embed.add_field(name=self.get_command_signature(command),
-                                value=command.help or LOCAL["help_no_info"][language])
+                                value=LOCAL[command.help][language] if command.help else LOCAL["help_no_info"][
+                                    language])
 
         await self.get_destination().send(embed=embed)
 
     def command_not_found(self, string):
-        language = self.context.guild.preferred_locale
-        if self.context.guild.preferred_locale not in LANGS:
-            language = DEFULT_LANG
+        language = get_guild_lang(self.context.guild)
 
         return LOCAL["help_command_not_found"][language].format(string)
 
@@ -173,6 +165,8 @@ async def on_message(message):
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send(f"Вы сможете использовать эту команду повторно через {round(error.retry_after, 2)} секунд")
+    elif isinstance(error, commands.NoPrivateMessage):
+        await ctx.send("Эта команда предназначеня только для серверов.")
     elif isinstance(error, commands.CommandNotFound):
         pass
     else:
@@ -292,7 +286,7 @@ def main():
             bot.load_extension("cogs." + f[:-3])
 
     bot.help_command = CustomHelpCommand(
-        command_attrs={'name': "help", 'aliases': ["helpme", "помощь", "хелп"], 'help': "Помпощь по командам бота."})
+        command_attrs={'name': "help", 'aliases': ["helpme", "помощь", "хелп"], 'help': "commnad_help_help"})
 
     bot.run(SETTINGS['token'])
 

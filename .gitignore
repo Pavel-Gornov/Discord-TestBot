@@ -1,6 +1,7 @@
 venv/
 output/
 __pycache__/
+.idea/
 
 /test.py
 /Token.py

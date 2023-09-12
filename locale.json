@@ -11,6 +11,17 @@
   "help_command": {"en-US": "Command", "ru": "Команда"},
   "help_command_not_found": {"en-US": "No command called \"{0}\" found.", "ru": "Команда \"{0}\" не найдена."},
 
+  "commnad_help_help": {"en-US": "Bot commands help.", "ru": "Помощь по командам Бота и их группам."},
+  "commnad_cat_help": {"en-US": "Sends pictures with cats to the chat! \uD83D\uDC31", "ru": "Отправляет в чат картинки с котиками! \uD83D\uDC31"},
+  "commnad_dog_help": {"en-US": "Sends pictures with dogs to the chat! \uD83D\uDC36", "ru": "Отправляет в чат картинки с собачками! \uD83D\uDC36"},
+  "commnad_fox_help": {"en-US": "Sends pictures with foxes to the chat! \uD83E\uDD8A", "ru": "Отправляет в чат картинки с лисичками! \uD83E\uDD8A"},
+  "commnad_http_info": {"en-US": "Web request status codes in the form of cat memes! \uD83D\uDC31", "ru": "Коды состояния web-запросов в виде мемов с котиками! \uD83D\uDC31"},
+  "command_avatar_info": {"en-US": "The simplest command to get a user's avatar. Accepts id or mention as argument.", "ru": "Простейшая команд для получения аватара пользователя. Принимает как аргумент id или упоминание."},
+  "command_random_info": {"en-US": "Returns a random one of the arguments. Delimiter - \";\"", "ru": "Возвращет случаный из аргументов. Разделитель — \";\""},
+  "command_me_info": {"en-US": "Sends a message as Bot. Works only in guilds and requires guild administrator permission.", "ru": "Отправляет сообщение от лица Бота. Рабоатет только на серверах и требует права администратора сервера."},
+  "command_hello_info": {"en-US": "A simple greeting command.", "ru": "Простенькая команда приветствия от Бота."},
+  "command_calculate_info": {"en-US": "Calculates mathematical expressions of varying levels of complexity. The command is able to work with complex numbers and more. ~~Please don't break it.~~", "ru": "Вычисляет математические выражения разного уровня сложности. Команда способна работать с комплексными числами и не только. ~~Пожалуйста, не ломайте её.~~"},
+
   "cogs": {
     "BaseCommands": {"en-US": "Base Commands", "ru": "Основные команды"},
     "Test": {"en-US": "Test Commands", "ru": "Тестовые команды"}

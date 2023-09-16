@@ -4,6 +4,13 @@
   "command_dice_option_sides_name": {"en-US": "sides", "ru": "грани"},
   "command_dice_option_sides_description": {"en-US": "Number of sides", "ru": "Количество граней кубика"},
 
+  "command_avatar_name": {"en-US": "avatar", "ru": "аватар"},
+  "command_avatar_description": {"en-US": "Sends the user's profile picture.", "ru": "Отправляет аватар выбранного пользователя"},
+  "command_avatar_option_member_name": {"en-US": "member", "ru": "участник"},
+  "command_avatar_option_member_description": {"en-US": "Guilt member", "ru": "Участник сервра"},
+  "command_avatar_option_ephemeral_name": {"en-US": "ephemeral", "ru": "видимость"},
+  "command_avatar_option_ephemeral_description": {"en-US": "Will the respond be visible to everyone?", "ru": "Будет ли видно ответ всем?"},
+
   "help_help": {"en-US": "Help", "ru": "Вкладка помощи"},
   "help_no_info": {"en-US": "No Help Message Found... ", "ru": "Информации пока нет..."},
   "help_no_сategory": {"en-US": "No Category", "ru": "Без категории"},
@@ -11,10 +18,10 @@
   "help_command": {"en-US": "Command", "ru": "Команда"},
   "help_command_not_found": {"en-US": "No command called \"{0}\" found.", "ru": "Команда \"{0}\" не найдена."},
 
-  "commnad_help_help": {"en-US": "Bot commands help.", "ru": "Помощь по командам Бота и их группам."},
-  "commnad_cat_help": {"en-US": "Sends pictures with cats to the chat! \uD83D\uDC31", "ru": "Отправляет в чат картинки с котиками! \uD83D\uDC31"},
-  "commnad_dog_help": {"en-US": "Sends pictures with dogs to the chat! \uD83D\uDC36", "ru": "Отправляет в чат картинки с собачками! \uD83D\uDC36"},
-  "commnad_fox_help": {"en-US": "Sends pictures with foxes to the chat! \uD83E\uDD8A", "ru": "Отправляет в чат картинки с лисичками! \uD83E\uDD8A"},
+  "commnad_help_info": {"en-US": "Bot commands help.", "ru": "Помощь по командам Бота и их группам."},
+  "commnad_cat_info": {"en-US": "Sends pictures with cats to the chat! \uD83D\uDC31", "ru": "Отправляет в чат картинки с котиками! \uD83D\uDC31"},
+  "commnad_dog_info": {"en-US": "Sends pictures with dogs to the chat! \uD83D\uDC36", "ru": "Отправляет в чат картинки с собачками! \uD83D\uDC36"},
+  "commnad_fox_info": {"en-US": "Sends pictures with foxes to the chat! \uD83E\uDD8A", "ru": "Отправляет в чат картинки с лисичками! \uD83E\uDD8A"},
   "commnad_http_info": {"en-US": "Web request status codes in the form of cat memes! \uD83D\uDC31", "ru": "Коды состояния web-запросов в виде мемов с котиками! \uD83D\uDC31"},
   "command_avatar_info": {"en-US": "The simplest command to get a user's avatar. Accepts id or mention as argument.", "ru": "Простейшая команд для получения аватара пользователя. Принимает как аргумент id или упоминание."},
   "command_random_info": {"en-US": "Returns a random one of the arguments. Delimiter - \";\"", "ru": "Возвращет случаный из аргументов. Разделитель — \";\""},
@@ -25,5 +32,7 @@
   "cogs": {
     "BaseCommands": {"en-US": "Base Commands", "ru": "Основные команды"},
     "Test": {"en-US": "Test Commands", "ru": "Тестовые команды"}
-  }
+  },
+  "option_choice_yes": {"en-US": "Yes", "ru": "Да"},
+  "option_choice_no": {"en-US": "No", "ru": "Нет"}
 }

@@ -5,7 +5,6 @@ from typing import Optional
 
 import discord
 import requests
-from discord import Option
 from discord.ext import commands
 
 from storage import *
@@ -36,18 +35,11 @@ class BaseCommands(commands.Cog):
         embed.set_image(url=author.avatar.url)
         await ctx.reply(embed=embed)
 
-    @discord.commands.message_command(name="Аватар пользователя")
-    async def avatar_msg_command(self, ctx, message):
-        user = message.author
-        embed = discord.Embed(color=COLOR_CODES["bot"], title=f'Аватар {user}', description=f"id: {user.id}")
-        embed.set_image(url=user.avatar.url)
-        await ctx.respond(embed=embed, ephemeral=True)
-
     @commands.command(aliases=["rand", "ранд", "случайный", "случ"], help="command_random_info")
     async def random(self, ctx, *, args):
         await ctx.reply(random.choice(args.split(";")))
 
-    @commands.command(aliases=["m", "я"], help="command_me_info")
+    @commands.command(aliases=["m", "я", "сообщение"], help="command_me_info")
     @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def me(self, ctx, *, message):
@@ -57,17 +49,6 @@ class BaseCommands(commands.Cog):
     @commands.command(aliases=["hi", "hey", "Привет", "привет", "приветствие"], help="command_hello_info")
     async def hello(self, ctx):
         await ctx.send(f'{random.choice(GREETINGS_LIST)}, {ctx.message.author.mention}!')
-
-    @commands.slash_command(name=LOCAL["command_dice_name"][DEFULT_LANG],
-                            description=LOCAL["command_dice_description"][DEFULT_LANG],
-                            name_localizations=LOCAL["command_dice_name"],
-                            description_localizations=LOCAL["command_dice_description"])
-    async def dice_(self, ctx, sides: Option(int, name=LOCAL["command_dice_option_sides_name"][DEFULT_LANG],
-                                             description=LOCAL["command_dice_option_sides_description"][DEFULT_LANG],
-                                             name_localizations=LOCAL["command_dice_option_sides_name"],
-                                             description_localizations=LOCAL["command_dice_option_sides_description"],
-                                             required=False, default=6, min_value=1)):
-        await ctx.respond(random.randint(1, sides))
 
     @commands.command(aliases=["счёт", "калькулятор", "подсчёт", "calc", "вычислить"], help="command_calculate_info")
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -81,7 +62,7 @@ class BaseCommands(commands.Cog):
                 print(e)
         await ctx.reply("Произошла ошибка.")
 
-    @commands.command(aliases=["c", "кот", "Кот", "Cat", "🐱"], help="commnad_cat_help")
+    @commands.command(aliases=["c", "кот", "Кот", "Cat", "🐱"], help="commnad_cat_info")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def cat(self, ctx):
         async with ctx.channel.typing():
@@ -90,7 +71,7 @@ class BaseCommands(commands.Cog):
             embed.set_image(url=response.json()[0]["url"])
         await ctx.reply(embed=embed)
 
-    @commands.command(aliases=["d", "собака", "Пёс", "Собака", "Dog", "🐶"], help="commnad_dog_help")
+    @commands.command(aliases=["d", "собака", "Пёс", "Собака", "Dog", "🐶"], help="commnad_dog_info")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def dog(self, ctx):
         async with ctx.channel.typing():
@@ -99,7 +80,7 @@ class BaseCommands(commands.Cog):
             embed.set_image(url=response.json()[0]["url"])
         await ctx.reply(embed=embed)
 
-    @commands.command(aliases=["лиса", "лис", "Fox", "Лис", "Лиса", "🦊"], help="commnad_fox_help")
+    @commands.command(aliases=["лиса", "лис", "Fox", "Лис", "Лиса", "🦊"], help="commnad_fox_info")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def fox(self, ctx):
         async with ctx.channel.typing():

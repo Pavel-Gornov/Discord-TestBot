@@ -1,4 +1,5 @@
 import os
+import random
 
 import requests
 from discord import Option
@@ -110,6 +111,16 @@ class CustomHelpCommand(commands.HelpCommand):
         return LOCAL["help_command_not_found"][language].format(string)
 
 
+@bot.slash_command(name="help")
+async def help_(ctx):
+    language = get_guild_lang(ctx.guild)
+    embed = discord.Embed(title=LOCAL["help_help"][language])
+    for i in bot.application_commands:
+        if isinstance(i, discord.SlashCommand):
+            embed.add_field(name=i.name, value=i.mention)
+    await ctx.respond(embed=embed)
+
+
 @bot.slash_command(name="метка-времени", description="Что-то делает", guild_ids=GUILD_IDS)
 async def time(ctx, year: Option(int, description="Год для даты", required=False) = 1970,
                month: Option(int, description="Номер месяца года", required=False) = 1,
@@ -150,8 +161,6 @@ async def on_disconnect():
 @bot.event
 async def on_message(message):
     if message.author != bot.user:
-        if bot.user.mention in message.content:
-            print(message.author.mention)
         if message.content.startswith("t:") and message.author.id in whitelist:
             if message.reference:
                 await message.channel.send(message.content[2:], reference=message.reference)
@@ -173,16 +182,41 @@ async def on_command_error(ctx, error):
         raise error
 
 
-@bot.slash_command(name='аватар', description='Фото профиля пользователя.', guild_ids=GUILD_IDS)
-async def avatar_(ctx, user: Option(discord.Member, description='Участник сервера', required=False),
-                  visible: Option(str, description='Отображать для всех?', choices=("Да", "Нет"), required=False)):
-    author = user if user else ctx.author
+@bot.slash_command(name=LOCAL["command_avatar_name"][DEFULT_LANG],
+                   description=LOCAL["command_avatar_description"][DEFULT_LANG],
+                   name_localizations=LOCAL["command_avatar_name"],
+                   description_localizations=LOCAL["command_avatar_description"])
+async def avatar_(ctx, member: Option(discord.Member, name=LOCAL["command_avatar_option_member_name"][DEFULT_LANG],
+                                      description=LOCAL["command_avatar_option_member_description"][DEFULT_LANG],
+                                      name_localizations=LOCAL["command_avatar_option_member_name"],
+                                      description_localizations=LOCAL["command_avatar_option_member_description"],
+                                      required=False),
+                  ephemeral: Option(str, name=LOCAL["command_avatar_option_ephemeral_name"][DEFULT_LANG],
+                                    description=LOCAL["command_avatar_option_ephemeral_description"][DEFULT_LANG],
+                                    name_localizations=LOCAL["command_avatar_option_ephemeral_name"],
+                                    description_localizations=LOCAL["command_avatar_option_ephemeral_description"],
+                                    choices=(discord.OptionChoice(name=LOCAL["option_choice_yes"][DEFULT_LANG],
+                                                                  name_localizations=LOCAL["option_choice_yes"],
+                                                                  value="False"),
+                                             discord.OptionChoice(name=LOCAL["option_choice_no"][DEFULT_LANG],
+                                                                  name_localizations=LOCAL["option_choice_no"],
+                                                                  value="True")), required=False)):
+    author = member if member else ctx.author
     embed = discord.Embed(color=COLOR_CODES["bot"], title=f'Аватар {author}', description=f"id: {author.id}")
     embed.set_image(url=author.avatar.url)
-    if visible == "Да":
-        await ctx.respond(embed=embed)
-    else:
-        await ctx.respond(embed=embed, ephemeral=True)
+    await ctx.respond(embed=embed, ephemeral=bool(ephemeral))
+
+
+@bot.slash_command(name=LOCAL["command_dice_name"][DEFULT_LANG],
+                   description=LOCAL["command_dice_description"][DEFULT_LANG],
+                   name_localizations=LOCAL["command_dice_name"],
+                   description_localizations=LOCAL["command_dice_description"])
+async def dice_(ctx, sides: Option(int, name=LOCAL["command_dice_option_sides_name"][DEFULT_LANG],
+                                   description=LOCAL["command_dice_option_sides_description"][DEFULT_LANG],
+                                   name_localizations=LOCAL["command_dice_option_sides_name"],
+                                   description_localizations=LOCAL["command_dice_option_sides_description"],
+                                   required=False, default=6, min_value=1)):
+    await ctx.respond(random.randint(1, sides))
 
 
 @bot.slash_command(name='api', description='Присылает случайное изображение.', guild_ids=GUILD_IDS)
@@ -222,10 +256,10 @@ async def message_(ctx,
                    guild_ids=GUILD_IDS)
 @discord.commands.default_permissions(administrator=True)
 @discord.commands.guild_only()
-async def message_(ctx,
-                   text: Option(str, description='Текст (";" между строками, "—" между вариантами)', required=True),
-                   channel_id: Option(str, description='id канала.', required=False),
-                   visible: Option(str, description='Отображать для всех?', choices=("Да", "Нет"), required=False)):
+async def vote_(ctx,
+                text: Option(str, description='Текст (";" между строками, "—" между вариантами)', required=True),
+                channel_id: Option(str, description='id канала.', required=False),
+                visible: Option(str, description='Отображать для всех?', choices=("Да", "Нет"), required=False)):
     try:
         visible = visible != "Да"
         text = text.split(";")
@@ -257,27 +291,34 @@ async def mnl(ctx, *, arg):
     async with ctx.channel.typing():
         code_input = arg.replace("```", "")
 
-        mnl_e = mnllib.MnLExecutor()
+        mnl_e = mnllib.__ENGINES__['default']()
+        mnl_e.load_module(mnllib.modules.MnLBaseModule())
         fio = mnl_mod.MnLFakeIOModule()
-        mnl_e.load_module(mnllib.MnLBaseModule())
         mnl_e.load_module(fio)
 
         try:
             mnl_e.run(code_input)
             embed = discord.Embed(colour=COLOR_CODES["success"], title="Вывод программы:", description=fio.stdout)
-        except mnllib.MnLParserError as pe:
+        except mnllib.exceptions.MnLParserError as pe:
             embed = discord.Embed(colour=COLOR_CODES["error"], title="Ошибка при выполненни программы!",
                                   description=f"Parser error: {pe.message} / {pe.string}")
-        except mnllib.MnLExecutorError as ee:
+        except mnllib.exceptions.MnLExecutorError as ee:
             embed = discord.Embed(colour=COLOR_CODES["error"], title="Ошибка при выполненни программы!",
                                   description=f"Executor error: {ee.message} / token #{ee.tokenid}: "
                                               f"{mnl_e.strparset(ee.token)} / {str(type(ee.exc))[8:-2]} - {ee.exc}")
-        except mnllib.MnLSecurityError as se:
+        except mnllib.exceptions.MnLSecurityError as se:
             embed = discord.Embed(colour=COLOR_CODES["error"], title="Ошибка при выполненни программы!",
                                   description=f"Security error: code {se.code}")
-            print(se.message)
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
     await ctx.reply(embed=embed)
+
+
+@bot.message_command(name="Аватар пользователя")
+async def avatar_msg_command(ctx, message):
+    user = message.author
+    embed = discord.Embed(color=COLOR_CODES["bot"], title=f'Аватар {user}', description=f"id: {user.id}")
+    embed.set_image(url=user.avatar.url)
+    await ctx.respond(embed=embed, ephemeral=True)
 
 
 def main():

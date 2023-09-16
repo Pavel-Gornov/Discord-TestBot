@@ -1,17 +1,18 @@
-from lib import mnllib
+from lib.mnllib.modules import MnLBaseModule
+from lib.mnllib.util import PyMnLAdapter
 
 
-class MnLFakeIOModule(mnllib.MnLBaseModule):
+class MnLFakeIOModule(MnLBaseModule):
     def __init__(self):
         super().__init__()
         self.stdout = ""
 
         def fprint(*args, end='\n', sep=' '):
-            self.stdout += sep.join([str(a) for a in args]) + end
+            self.stdout += sep.join([str(arg) for arg in args]) + end
 
         def finput(*args, **kwargs):
             return ''
 
         self.code_globals = {**self.code_globals,
-                             'print': mnllib.PyMnLAdapter(self, fprint),
-                             'input': mnllib.PyMnLAdapter(self, finput)}
+                             'print': PyMnLAdapter(self, fprint),
+                             'input': PyMnLAdapter(self, finput)}

@@ -25,6 +25,31 @@ def makeDSTimestamp(year, month, day, hour, minute, second, timezone, mode):
 
 # TODO: Добавить настройки языка сервера и использовать их в этой функции.
 def get_guild_lang(guild: discord.Guild) -> str:
-    if guild.preferred_locale not in LANGS:
+    if not guild or guild.preferred_locale not in LANGS:
         return DEFULT_LANG
     return guild.preferred_locale
+
+
+def is_emoji(string):
+    range_min = 127744
+    range_max = 129782
+    range_min_2 = 126980
+    range_max_2 = 127569
+    range_min_3 = 169
+    range_max_3 = 174
+    range_min_4 = 8205
+    range_max_4 = 12953
+    if string:
+        for a_char in string:
+            char_code = ord(a_char)
+            if range_min <= char_code <= range_max:
+                return True
+            elif range_min_2 <= char_code <= range_max_2:
+                return True
+            elif range_min_3 <= char_code <= range_max_3:
+                return True
+            elif range_min_4 <= char_code <= range_max_4:
+                return True
+        return False
+    else:
+        return False

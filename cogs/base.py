@@ -60,7 +60,7 @@ class BaseCommands(commands.Cog):
                 await ctx.reply(f"Результат: {res}")
             except Exception as e:
                 print(e)
-        await ctx.reply("Произошла ошибка.")
+                await ctx.reply("Произошла ошибка.")
 
     @commands.command(aliases=["c", "кот", "Кот", "Cat", "🐱"], help="commnad_cat_info")
     @commands.cooldown(1, 5, commands.BucketType.user)

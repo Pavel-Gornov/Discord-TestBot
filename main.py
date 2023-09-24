@@ -3,7 +3,8 @@ import random
 
 import requests
 from discord import Option
-from lib.utils import makeDSTimestamp, get_guild_lang
+
+from lib.utils import makeDSTimestamp, get_guild_lang, is_emoji
 from lib import mnl_mod, mnllib
 from discord.ext import commands
 import discord
@@ -111,8 +112,8 @@ class CustomHelpCommand(commands.HelpCommand):
         return LOCAL["help_command_not_found"][language].format(string)
 
 
-@bot.slash_command(name="help")
-async def help_(ctx):
+@bot.slash_command(name="help", description="")
+async def help_(ctx: discord.ApplicationContext):
     language = get_guild_lang(ctx.guild)
     embed = discord.Embed(title=LOCAL["help_help"][language])
     for i in bot.application_commands:
@@ -122,21 +123,21 @@ async def help_(ctx):
 
 
 @bot.slash_command(name="метка-времени", description="Что-то делает", guild_ids=GUILD_IDS)
-async def time(ctx, year: Option(int, description="Год для даты", required=False) = 1970,
-               month: Option(int, description="Номер месяца года", required=False) = 1,
-               day: Option(int, description="Номер дня месяца", required=False) = 1,
-               hour: Option(int, description="Час дня", required=False) = 0,
-               minute: Option(int, description="Минута часа", required=False) = 0,
-               second: Option(int, description="Секунда минуты", required=False) = 0,
-               timezone: Option(int, description="Временная зона GMT+n", required=False) = 0,
-               mode: Option(str, description="Тип отображения", choices=("R — Оставшееся время",
-                                                                         "d — Короткая запись даты только цифрами",
-                                                                         "D — Дата с подписью месяца словом",
-                                                                         "f — Дата и время",
-                                                                         "F — Полные день недели, дата и время",
-                                                                         "t — Часы и минуты",
-                                                                         "T — Часы, минуты и секунды"),
-                            required=False) = "R"):
+async def time_(ctx, year: Option(int, description="Год для даты", required=False) = 1970,
+                month: Option(int, description="Номер месяца года", required=False) = 1,
+                day: Option(int, description="Номер дня месяца", required=False) = 1,
+                hour: Option(int, description="Час дня", required=False) = 0,
+                minute: Option(int, description="Минута часа", required=False) = 0,
+                second: Option(int, description="Секунда минуты", required=False) = 0,
+                timezone: Option(int, description="Временная зона GMT+n", required=False) = 0,
+                mode: Option(str, description="Тип отображения", choices=("R — Оставшееся время",
+                                                                          "d — Короткая запись даты только цифрами",
+                                                                          "D — Дата с подписью месяца словом",
+                                                                          "f — Дата и время",
+                                                                          "F — Полные день недели, дата и время",
+                                                                          "t — Часы и минуты",
+                                                                          "T — Часы, минуты и секунды"),
+                             required=False) = "R"):
     await ctx.respond(makeDSTimestamp(year, month, day, hour, minute, second, timezone, mode))
 
 
@@ -150,12 +151,8 @@ async def on_connect():
 @bot.event
 async def on_ready():
     await bot.change_presence(activity=discord.Game("Discord"))
+    print(f"Бот находиться на {len(bot.guilds)} серверах.")
     print(f'{bot.user.name} запустился и готов к работе!')
-
-
-@bot.event
-async def on_disconnect():
-    print(f"{bot.user.name} отключён.")
 
 
 @bot.event
@@ -219,77 +216,72 @@ async def dice_(ctx, sides: Option(int, name=LOCAL["command_dice_option_sides_na
     await ctx.respond(random.randint(1, sides))
 
 
-@bot.slash_command(name='api', description='Присылает случайное изображение.', guild_ids=GUILD_IDS)
-@discord.option(name="img_type", type=str, description='Тип животного', choices=("Коты", "Собаки", "Лисы"),
-                required=True)
-@discord.option(name="name", type=str, description='Название Embed`а с изображением', required=False)
-async def img_(ctx, img_type, name=None):
-    if not name:
-        name = {"Коты": "Случайный Кот", "Собаки": "Случайная Собака", "Лисы": "Случайная Лиса"}[img_type]
-    embed = discord.Embed(color=COLOR_CODES["bot"], title=name)
-    if img_type == "Коты":
-        response = requests.get("https://api.thecatapi.com/v1/images/search?mime_types=jpg,png")
-        embed.set_image(url=response.json()[0]["url"])
-    elif img_type == "Собаки":
-        response = requests.get("https://api.thedogapi.com/v1/images/search?mime_types=jpg,png")
-        embed.set_image(url=response.json()[0]["url"])
-    else:
-        response = requests.get("https://randomfox.ca/floof")
-        embed.set_image(url=response.json()["image"])
+@bot.slash_command(name="кот", description="", name_localizations=None, description_localizations=None)
+@commands.cooldown(1, 5, commands.BucketType.user)
+async def cat_(ctx: discord.ApplicationContext):
+    response = requests.get("https://api.thecatapi.com/v1/images/search?mime_types=jpg,png")
+    embed = discord.Embed(color=COLOR_CODES["bot"], title="Случайный Кот")
+    embed.set_image(url=response.json()[0]["url"])
+    await ctx.respond(embed=embed)
+
+
+@bot.slash_command(name="пёс", description="", name_localizations=None, description_localizations=None)
+@commands.cooldown(1, 5, commands.BucketType.user)
+async def dog_(ctx: discord.ApplicationContext):
+    response = requests.get("https://api.thedogapi.com/v1/images/search?mime_types=jpg,png")
+    embed = discord.Embed(color=COLOR_CODES["bot"], title="Случайная Собака")
+    embed.set_image(url=response.json()[0]["url"])
+    await ctx.respond(embed=embed)
+
+
+@bot.slash_command(name="лис", description="", name_localizations=None, description_localizations=None)
+@commands.cooldown(1, 5, commands.BucketType.user)
+async def fox_(ctx: discord.ApplicationContext):
+    response = requests.get("https://randomfox.ca/floof")
+    embed = discord.Embed(color=COLOR_CODES["bot"], title="Случайная Лиса")
+    embed.set_image(url=response.json()["image"])
     await ctx.respond(embed=embed)
 
 
 @bot.slash_command(name='сообщение', description="Отправка сообщений от лица бота.", guild_ids=GUILD_IDS)
-async def message_(ctx,
+@discord.commands.default_permissions(administrator=True)
+async def message_(ctx: discord.ApplicationContext,
                    text: Option(str, description='Ваше сообщение.', required=True),
-                   channel_id: Option(str, description='id канала.', required=False)):
-    if ctx.author.id in whitelist:
-        if channel_id:
-            channel = bot.get_channel(int(channel_id))
-            await channel.send(text)
-        else:
-            await ctx.send(text)
-        await ctx.respond("Успешно. :white_check_mark:", ephemeral=True)
+                   channel: Option(discord.TextChannel, description='Канал для отправки сообщения.', required=False)):
+    channel = channel if channel else ctx.channel
+    await channel.send(text)
+    await ctx.respond("Успешно. :white_check_mark:", ephemeral=True)
 
 
-@bot.slash_command(name='голосование', description="Отправка голосования от лица бота.",
-                   guild_ids=GUILD_IDS)
+@bot.slash_command(name='голосование', description="Отправка голосования от лица бота.")
 @discord.commands.default_permissions(administrator=True)
 @discord.commands.guild_only()
 async def vote_(ctx,
-                text: Option(str, description='Текст (";" между строками, "—" между вариантами)', required=True),
-                channel_id: Option(str, description='id канала.', required=False),
-                visible: Option(str, description='Отображать для всех?', choices=("Да", "Нет"), required=False)):
-    try:
-        visible = visible != "Да"
-        text = text.split(";")
-        res = []
-        s = ""
-        for i in text:
-            if "—" in i:
-                res.append(i.split("—"))
-            s += i + "\n"
-        if channel_id:
-            channel = bot.get_channel(int(channel_id))
-            message = await channel.send(s)
-        else:
-            message = await ctx.send(s)
-        await ctx.respond("Успешно. :white_check_mark:", ephemeral=visible)
-        if res:
-            for i in res:
-                await message.add_reaction(i[0].replace(" ", ""))
-        else:
-            await message.add_reaction('✅')
-            await message.add_reaction('❌')
-    except Exception as e:
-        print(e)
+                text: Option(str, description='Текст сообщения. (";" для переноса строки, "-" между вариантами)',
+                             required=True),
+                channel: Option(discord.TextChannel, required=False)):
+    channel = channel if channel else ctx.channel
+    text = text.replace(";", "\n")
+    reactions = []
+    for i in text.split("\n"):
+        if "-" in i:
+            e = i.split()[0].replace(" ", "")
+            if e.startswith("<:") and e.endswith(">") or is_emoji(e):
+                reactions.append(e)
+    if not reactions:
+        reactions = ['✅', '❌']
+    message = await channel.send(text.replace(" - ", " — "))
+    for i in reactions:
+        await message.add_reaction(i)
+    await ctx.respond(embed=discord.Embed(title="Успешно! :white_check_mark:", colour=COLOR_CODES["success"]),
+                      ephemeral=True)
 
 
 @bot.command(aliases=["мнл"])
 @commands.cooldown(1, 5, commands.BucketType.user)
-async def mnl(ctx, *, arg):
+async def mnl(ctx, *, code):
     async with ctx.channel.typing():
-        code_input = arg.replace("```", "")
+        code_input = code.replace("```", "")
 
         mnl_e = mnllib.__ENGINES__['default']()
         mnl_e.load_module(mnllib.modules.MnLBaseModule())

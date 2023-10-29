@@ -3,6 +3,5 @@ output/
 __pycache__/
 .idea/
 
-/test.py
+/*test*.py
 /Token.py
-/dev_problem_test.py

@@ -1,7 +1,7 @@
 import os
 import random
 
-import requests
+import aiohttp
 from discord import Option
 
 from lib.utils import makeDSTimestamp, get_guild_lang, is_emoji
@@ -116,13 +116,19 @@ class CustomHelpCommand(commands.HelpCommand):
 async def help_(ctx: discord.ApplicationContext):
     language = get_guild_lang(ctx.guild)
     embed = discord.Embed(title=LOCAL["help_help"][language])
+    comands = list()
     for i in bot.application_commands:
-        if isinstance(i, discord.SlashCommand):
-            embed.add_field(name=i.name, value=i.mention)
+        if i not in comands and isinstance(i, discord.SlashCommand):
+            if i.guild_only and ctx.guild:
+                if ctx.guild.id in i.guild_ids:
+                    embed.add_field(name=i.name, value=i.mention)
+            else:
+                embed.add_field(name=i.name, value=i.mention)
+            comands.append(i)
     await ctx.respond(embed=embed)
 
 
-@bot.slash_command(name="метка-времени", description="Что-то делает", guild_ids=GUILD_IDS)
+@bot.slash_command(name="метка-времени", description="Что-то делает")
 async def time_(ctx, year: Option(int, description="Год для даты", required=False) = 1970,
                 month: Option(int, description="Номер месяца года", required=False) = 1,
                 day: Option(int, description="Номер дня месяца", required=False) = 1,
@@ -170,11 +176,25 @@ async def on_message(message):
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
-        await ctx.send(f"Вы сможете использовать эту команду повторно через {round(error.retry_after, 2)} секунд")
+        embed = discord.Embed(color=COLOR_CODES["error"], title=f'Произошла ощибка!',
+                              description=f"Вы сможете использовать эту команду повторно через {round(error.retry_after, 2)} секунд")
+        await ctx.send(embed=embed)
     elif isinstance(error, commands.NoPrivateMessage):
-        await ctx.send("Эта команда предназначеня только для серверов.")
+        embed = discord.Embed(color=COLOR_CODES["error"], title=f'Произошла ощибка!',
+                              description=f"Эта команда предназначеня только для серверов.")
+        await ctx.send(embed=embed)
     elif isinstance(error, commands.CommandNotFound):
         pass
+    else:
+        raise error
+
+
+@bot.event
+async def on_application_command_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        embed = discord.Embed(color=COLOR_CODES["error"], title=f'Произошла ощибка!',
+                              description=f"Вы сможете использовать эту команду повторно через {round(error.retry_after, 2)} секунд")
+        await ctx.respond(embed=embed, ephemeral=True)
     else:
         raise error
 
@@ -219,31 +239,37 @@ async def dice_(ctx, sides: Option(int, name=LOCAL["command_dice_option_sides_na
 @bot.slash_command(name="кот", description="", name_localizations=None, description_localizations=None)
 @commands.cooldown(1, 5, commands.BucketType.user)
 async def cat_(ctx: discord.ApplicationContext):
-    response = requests.get("https://api.thecatapi.com/v1/images/search?mime_types=jpg,png")
+    async with aiohttp.ClientSession() as session:
+        async with session.get("https://api.thecatapi.com/v1/images/search?mime_types=jpg,png") as response:
+            response = await response.json()
     embed = discord.Embed(color=COLOR_CODES["bot"], title="Случайный Кот")
-    embed.set_image(url=response.json()[0]["url"])
+    embed.set_image(url=response[0]["url"])
     await ctx.respond(embed=embed)
 
 
 @bot.slash_command(name="пёс", description="", name_localizations=None, description_localizations=None)
 @commands.cooldown(1, 5, commands.BucketType.user)
 async def dog_(ctx: discord.ApplicationContext):
-    response = requests.get("https://api.thedogapi.com/v1/images/search?mime_types=jpg,png")
+    async with aiohttp.ClientSession() as session:
+        async with session.get("https://api.thedogapi.com/v1/images/search?mime_types=jpg,png") as response:
+            response = await response.json()
     embed = discord.Embed(color=COLOR_CODES["bot"], title="Случайная Собака")
-    embed.set_image(url=response.json()[0]["url"])
+    embed.set_image(url=response[0]["url"])
     await ctx.respond(embed=embed)
 
 
 @bot.slash_command(name="лис", description="", name_localizations=None, description_localizations=None)
 @commands.cooldown(1, 5, commands.BucketType.user)
 async def fox_(ctx: discord.ApplicationContext):
-    response = requests.get("https://randomfox.ca/floof")
+    async with aiohttp.ClientSession() as session:
+        async with session.get("https://randomfox.ca/floof") as response:
+            response = await response.json()
     embed = discord.Embed(color=COLOR_CODES["bot"], title="Случайная Лиса")
-    embed.set_image(url=response.json()["image"])
+    embed.set_image(url=response["image"])
     await ctx.respond(embed=embed)
 
 
-@bot.slash_command(name='сообщение', description="Отправка сообщений от лица бота.", guild_ids=GUILD_IDS)
+@bot.slash_command(name='сообщение', description="Отправка сообщений от лица бота.")
 @discord.commands.default_permissions(administrator=True)
 async def message_(ctx: discord.ApplicationContext,
                    text: Option(str, description='Ваше сообщение.', required=True),
@@ -275,6 +301,16 @@ async def vote_(ctx,
         await message.add_reaction(i)
     await ctx.respond(embed=discord.Embed(title="Успешно! :white_check_mark:", colour=COLOR_CODES["success"]),
                       ephemeral=True)
+
+
+# TODO: Довести до ума. \/
+@bot.slash_command(name='сервер', description="Информация о сервере. (в разработке)")
+@discord.commands.guild_only()
+async def server_(ctx: discord.ApplicationContext):
+    guild = ctx.guild
+    embed = discord.Embed(title=f"Сервер {guild.name}", colour=COLOR_CODES["bot"])
+    embed.set_thumbnail(url=guild.icon.url)
+    await ctx.respond(embed=embed)
 
 
 @bot.command(aliases=["мнл"])
@@ -320,7 +356,6 @@ def main():
 
     bot.help_command = CustomHelpCommand(
         command_attrs={'name': "help", 'aliases': ["helpme", "помощь", "хелп"], 'help': "commnad_help_help"})
-
     bot.run(SETTINGS['token'])
 
 

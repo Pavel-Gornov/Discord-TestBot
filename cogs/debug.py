@@ -31,12 +31,14 @@ class Test(commands.Cog):
     @commands.slash_command(name='очистка', description='Очищает сообщения, почеменные, как "офф-топ"', guild_ids=GUILD_IDS)
     @discord.commands.default_permissions(administrator=True)
     @discord.commands.guild_only()
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def clear_(self, ctx: discord.ApplicationContext, number: discord.Option(int, min_value=0, max_value=1000, default=100, required=False),
                      channel: discord.Option(discord.TextChannel, required=False)):
         channel = channel if channel else ctx.channel
         msgs = list()
         async for x in channel.history(limit=number):
-            if ((x.content.startswith("//") or x.content.startswith("((")) and "⭐" not in [i.emoji for i in x.reactions]
+            if ((x.content.startswith("//") or x.content.startswith("(("))
+                    #and "⭐" not in [i.emoji for i in x.reactions]
                     and datetime.datetime.now(x.created_at.tzinfo) - x.created_at <= datetime.timedelta(days=14) and not x.pinned):
                 msgs.append(x)
         await ctx.respond(f"Будет удлено {len(msgs)} сообщений.", delete_after=10)

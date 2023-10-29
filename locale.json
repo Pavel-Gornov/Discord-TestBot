@@ -9,7 +9,7 @@
   "command_avatar_option_member_name": {"en-US": "member", "ru": "участник"},
   "command_avatar_option_member_description": {"en-US": "Guilt member", "ru": "Участник сервра"},
   "command_avatar_option_ephemeral_name": {"en-US": "ephemeral", "ru": "видимость"},
-  "command_avatar_option_ephemeral_description": {"en-US": "Will the respond be visible to everyone?", "ru": "Будет ли видно ответ всем?"},
+  "command_avatar_option_ephemeral_description": {"en-US": "Will the respond be visible to everyone?", "ru": "Будет ли видно ответ только Вам?"},
 
   "help_help": {"en-US": "Help", "ru": "Вкладка помощи"},
   "help_no_info": {"en-US": "No Help Message Found... ", "ru": "Информации пока нет..."},

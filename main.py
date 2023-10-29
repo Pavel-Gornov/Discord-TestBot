@@ -214,14 +214,15 @@ async def avatar_(ctx, member: Option(discord.Member, name=LOCAL["command_avatar
                                     description_localizations=LOCAL["command_avatar_option_ephemeral_description"],
                                     choices=(discord.OptionChoice(name=LOCAL["option_choice_yes"][DEFULT_LANG],
                                                                   name_localizations=LOCAL["option_choice_yes"],
-                                                                  value="False"),
+                                                                  value="1"),
                                              discord.OptionChoice(name=LOCAL["option_choice_no"][DEFULT_LANG],
                                                                   name_localizations=LOCAL["option_choice_no"],
-                                                                  value="True")), required=False)):
+                                                                  value="0")), required=False)):
     author = member if member else ctx.author
     embed = discord.Embed(color=COLOR_CODES["bot"], title=f'Аватар {author}', description=f"id: {author.id}")
     embed.set_image(url=author.avatar.url)
-    await ctx.respond(embed=embed, ephemeral=bool(ephemeral))
+    ephemeral = True if ephemeral == "1" else False
+    await ctx.respond(embed=embed, ephemeral=ephemeral)
 
 
 @bot.slash_command(name=LOCAL["command_dice_name"][DEFULT_LANG],

@@ -283,11 +283,13 @@ async def message_(ctx: discord.ApplicationContext,
 @bot.slash_command(name='голосование', description="Отправка голосования от лица бота.")
 @discord.commands.default_permissions(administrator=True)
 @discord.commands.guild_only()
-async def vote_(ctx,
+async def vote_(ctx: discord.ApplicationContext,
                 text: Option(str, description='Текст сообщения. (";" для переноса строки, "-" между вариантами)',
                              required=True),
-                channel: Option(discord.TextChannel, required=False)):
+                channel: Option(discord.TextChannel, required=False),
+                file: Option(discord.Attachment, required=False, default=None)):
     channel = channel if channel else ctx.channel
+    file = await file.to_file() if file else None
     text = text.replace(";", "\n")
     reactions = []
     for i in text.split("\n"):
@@ -297,7 +299,7 @@ async def vote_(ctx,
                 reactions.append(e)
     if not reactions:
         reactions = ['✅', '❌']
-    message = await channel.send(text.replace(" - ", " — "))
+    message = await channel.send(text.replace(" - ", " — "), file=file)
     for i in reactions:
         await message.add_reaction(i)
     await ctx.respond(embed=discord.Embed(title="Успешно! :white_check_mark:", colour=COLOR_CODES["success"]),

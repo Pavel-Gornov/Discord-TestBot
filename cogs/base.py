@@ -1,6 +1,4 @@
-import math
 import random
-import numexpr
 from typing import Optional
 
 import discord
@@ -8,7 +6,6 @@ import aiohttp
 from discord.ext import commands
 
 from storage import *
-from lib.utils import run_until
 
 COG_NAME: final = "основых команд"
 
@@ -49,19 +46,6 @@ class BaseCommands(commands.Cog):
     @commands.command(aliases=["hi", "hey", "Привет", "привет", "приветствие"], help="command_hello_info")
     async def hello(self, ctx):
         await ctx.send(f'{random.choice(GREETINGS_LIST)}, {ctx.message.author.mention}!')
-
-    @commands.command(aliases=["счёт", "калькулятор", "подсчёт", "calc", "вычислить"], help="command_calculate_info")
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def calculate(self, ctx, *, expression):
-        async with ctx.channel.typing():
-            expression = expression.replace("π", str(math.pi)).replace("E", str(math.e))
-            try:
-                res = run_until(5, numexpr.evaluate, expression)
-                res = f"Результат: {res}"
-            except Exception as e:
-                print(e)
-                res = "Произошла ошибка."
-        await ctx.reply(res)
 
     @commands.command(aliases=["c", "кот", "Кот", "Cat", "🐱"], help="commnad_cat_info")
     @commands.cooldown(1, 5, commands.BucketType.user)

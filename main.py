@@ -5,7 +5,6 @@ import aiohttp
 from discord import Option
 
 from lib.utils import makeDSTimestamp, get_guild_lang, is_emoji
-from lib import mnl_mod, mnllib
 from discord.ext import commands
 import discord
 from storage import *
@@ -314,34 +313,6 @@ async def server_(ctx: discord.ApplicationContext):
     embed = discord.Embed(title=f"Сервер {guild.name}", colour=COLOR_CODES["bot"])
     embed.set_thumbnail(url=guild.icon.url)
     await ctx.respond(embed=embed)
-
-
-@bot.command(aliases=["мнл"])
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def mnl(ctx, *, code):
-    async with ctx.channel.typing():
-        code_input = code.replace("```", "")
-
-        mnl_e = mnllib.__ENGINES__['default']()
-        mnl_e.load_module(mnllib.modules.MnLBaseModule())
-        fio = mnl_mod.MnLFakeIOModule()
-        mnl_e.load_module(fio)
-
-        try:
-            mnl_e.run(code_input)
-            embed = discord.Embed(colour=COLOR_CODES["success"], title="Вывод программы:", description=fio.stdout)
-        except mnllib.exceptions.MnLParserError as pe:
-            embed = discord.Embed(colour=COLOR_CODES["error"], title="Ошибка при выполненни программы!",
-                                  description=f"Parser error: {pe.message} / {pe.string}")
-        except mnllib.exceptions.MnLExecutorError as ee:
-            embed = discord.Embed(colour=COLOR_CODES["error"], title="Ошибка при выполненни программы!",
-                                  description=f"Executor error: {ee.message} / token #{ee.tokenid}: "
-                                              f"{mnl_e.strparset(ee.token)} / {str(type(ee.exc))[8:-2]} - {ee.exc}")
-        except mnllib.exceptions.MnLSecurityError as se:
-            embed = discord.Embed(colour=COLOR_CODES["error"], title="Ошибка при выполненни программы!",
-                                  description=f"Security error: code {se.code}")
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
-    await ctx.reply(embed=embed)
 
 
 @bot.message_command(name="Аватар пользователя")

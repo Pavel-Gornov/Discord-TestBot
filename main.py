@@ -15,8 +15,9 @@ bot = commands.Bot(command_prefix=commands.when_mentioned_or(SETTINGS['prefix'])
 class CustomHelpCommand(commands.HelpCommand):
     def cog_filter(self, string):
         for cog in self.context.bot.cogs:
-            if string in LOCAL["cogs"][cog].values():
-                return cog
+            if cog in LOCAL["cogs"].keys():
+                if string in LOCAL["cogs"][cog].values():
+                    return cog
         return string
 
     async def command_callback(self, ctx, *, command=None):

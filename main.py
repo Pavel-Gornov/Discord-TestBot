@@ -119,11 +119,15 @@ async def help_(ctx: discord.ApplicationContext):
     comands = list()
     for i in bot.application_commands:
         if i not in comands and isinstance(i, discord.SlashCommand):
-            if i.guild_only and ctx.guild:
-                if ctx.guild.id in i.guild_ids:
+            if ctx.guild:
+                if i.guild_ids:
+                    if ctx.guild.id in i.guild_ids:
+                        embed.add_field(name=i.name, value=i.mention)
+                else:
                     embed.add_field(name=i.name, value=i.mention)
             else:
-                embed.add_field(name=i.name, value=i.mention)
+                if not i.guild_only:
+                    embed.add_field(name=i.name, value=i.mention)
             comands.append(i)
     await ctx.respond(embed=embed)
 
@@ -326,12 +330,16 @@ async def avatar_msg_command(ctx, message):
 
 def main():
     for f in os.listdir("./cogs"):
-        if f.endswith(".py") and f != "economy.py":
+        if f.endswith("py"):
             bot.load_extension("cogs." + f[:-3])
 
     bot.help_command = CustomHelpCommand(
         command_attrs={'name': "help", 'aliases': ["helpme", "помощь", "хелп"], 'help': "commnad_help_help"})
-    bot.run(SETTINGS['token'])
+    try:
+        bot.run(SETTINGS['token'])
+    finally:
+        with open("economy.json", mode="w", encoding="utf-8") as f:
+            f.write(json.dumps(economy_data, indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":

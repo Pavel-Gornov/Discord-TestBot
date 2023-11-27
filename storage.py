@@ -7,6 +7,11 @@ def load_lacale():
         return json.load(f)
 
 
+def economy():
+    with open("economy.json", mode="r", encoding="utf-8") as f:
+        return json.load(f)
+
+
 GREETINGS_LIST: final = ('Привет', 'Приветствую', 'Рад видеть вас')
 COLOR_CODES: final = {"bot": 0xFFF7ED, "success": 0x66bb6a, "error": 0xf03431}
 EMOJIS: final = ("🪨", "📜", "✂")
@@ -24,3 +29,4 @@ BOT_ICON_URL: final = "https://media.discordapp.net/attachments/1055896512053399
 LANGS: final = ("ru", "en-US")
 DEFULT_LANG: final = "ru"
 LOCAL: final = load_lacale()
+economy_data = economy()

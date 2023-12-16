@@ -310,13 +310,32 @@ async def vote_(ctx: discord.ApplicationContext,
                       ephemeral=True)
 
 
-# TODO: Довести до ума. \/
 @bot.slash_command(name='сервер', description="Информация о сервере. (в разработке)")
 @discord.commands.guild_only()
 async def server_(ctx: discord.ApplicationContext):
     guild = ctx.guild
-    embed = discord.Embed(title=f"Сервер {guild.name}", colour=COLOR_CODES["bot"])
+    bot_count = len([m for m in guild.members if m.bot])
+    embed = discord.Embed(title=f"Сервер {guild.name}", description=f"Описание: {guild.description}",
+                          colour=COLOR_CODES["bot"])
     embed.set_thumbnail(url=guild.icon.url)
+    embed.add_field(name="Участники:", value=f":globe_with_meridians: Всего: **{guild.member_count}** \n"
+                                                     f":green_circle: Люди: **{guild.member_count - bot_count}**\n"
+                                                     f":gear: Боты: **{bot_count}**")
+    embed.add_field(name="Разное:", value=f'🟪 Уровень буста: **{guild.premium_tier}**\n'
+                                          f'🟣 Количество бустов: **{guild.premium_subscription_count}**\n'
+                                          f':label: Тип сервера: **{"Большой" if guild.large else "Малый"}**\n'
+                                          f'💾 Файлы: до {round(guild.filesize_limit / 1024 ** 2)} Мб')
+    embed.add_field(name="Каналы:", value=f"🗄️ Всего: **{len(guild.channels) - len(guild.categories)}**\n"
+                                          f"💬 Текстовые: **{len(guild.text_channels)}**\n"
+                                          f"🔊 Голосовые: **{len(guild.voice_channels)}**\n"
+                                          f"🗃️ Форумы: **{len(guild.forum_channels)}**\n"
+                                          f"📣 Объявления: **{len([c for c in guild.text_channels if c.news])}**")
+    embed.add_field(name="Владелец:", value=f"{guild.owner.mention}")
+    embed.add_field(name="Уровень проверки:", value=f"{guild.verification_level}")
+    embed.add_field(name="Дата основания:", value=f"<t:{int(guild.created_at.timestamp())}:D>\n"
+                                                  f"<t:{int(guild.created_at.timestamp())}:R>")
+    embed.set_footer(text=f"ID: {guild.id}")
+
     await ctx.respond(embed=embed)
 
 
@@ -337,8 +356,8 @@ def main():
         command_attrs={'name': "help", 'aliases': ["helpme", "помощь", "хелп"], 'help': "command_help_info"})
 
     bot.run(SETTINGS['token'])
-    #with open("economy.json", mode="w", encoding="utf-8") as f:
-        #f.write(json.dumps(economy_data, indent=2, ensure_ascii=False))
+    with open("economy.json", mode="w", encoding="utf-8") as f:
+        f.write(json.dumps(economy_data, indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":

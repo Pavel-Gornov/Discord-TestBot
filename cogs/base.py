@@ -1,5 +1,5 @@
 import random
-from typing import Optional
+from typing import Optional, Union
 
 import discord
 import aiohttp
@@ -26,10 +26,10 @@ class BaseCommands(commands.Cog):
             await ctx.reply("Нет такого кода.")
 
     @commands.command(aliases=["ava", "ава", "аватарка", "аватар"], help="command_avatar_info")
-    async def avatar(self, ctx, user: Optional[discord.Member]):
-        author = user if user else ctx.message.author
-        embed = discord.Embed(color=COLOR_CODES["bot"], title=f'Аватар {author}', description=f"id: {author.id}")
-        embed.set_image(url=author.avatar.url)
+    async def avatar(self, ctx, user: Optional[discord.User]):
+        user = user if user else ctx.message.author
+        embed = discord.Embed(color=COLOR_CODES["bot"], title=f'Аватар {user}', description=f"id: {user.id}")
+        embed.set_image(url=user.avatar.url)
         await ctx.reply(embed=embed)
 
     @commands.command(aliases=["rand", "ранд", "случайный", "случ"], help="command_random_info")

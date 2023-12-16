@@ -64,7 +64,8 @@ class BusinessView(discord.ui.View):
                     n += 1
 
     async def on_timeout(self):
-        self.clear_items()
+        if self.children:
+            self.clear_items()
         await super().on_timeout()
 
     @discord.ui.button(label="Закрыть окно", style=discord.ButtonStyle.red, custom_id="close")

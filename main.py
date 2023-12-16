@@ -47,7 +47,7 @@ class CustomHelpCommand(commands.HelpCommand):
                 if cog_name:
                     cog_name = LOCAL["cogs"][cog.qualified_name][language]
                 else:
-                    cog_name = LOCAL["help_no_сategory"][language]
+                    cog_name = LOCAL["help_no_category"][language]
                 embed.add_field(name=f"{cog_name}:", value="\n\t".join(command_signatures), inline=False)
 
         channel = self.get_destination()
@@ -91,7 +91,7 @@ class CustomHelpCommand(commands.HelpCommand):
         language = get_guild_lang(self.context.guild)
 
         embed = discord.Embed(
-            title=f'{LOCAL["cogs"][cog.qualified_name][language] or LOCAL["help_no_сategory"][language]}:',
+            title=f'{LOCAL["cogs"][cog.qualified_name][language] or LOCAL["help_no_category"][language]}:',
             description=cog.description,
             color=COLOR_CODES["bot"])
         embed.set_thumbnail(url=BOT_ICON_URL)
@@ -116,9 +116,9 @@ class CustomHelpCommand(commands.HelpCommand):
 async def help_(ctx: discord.ApplicationContext):
     language = get_guild_lang(ctx.guild)
     embed = discord.Embed(title=LOCAL["help_help"][language])
-    comands = list()
+    commands_list = list()
     for i in bot.application_commands:
-        if i not in comands and isinstance(i, discord.SlashCommand):
+        if i not in commands_list and isinstance(i, discord.SlashCommand):
             if ctx.guild:
                 if i.guild_ids:
                     if ctx.guild.id in i.guild_ids:
@@ -128,7 +128,7 @@ async def help_(ctx: discord.ApplicationContext):
             else:
                 if not i.guild_only:
                     embed.add_field(name=i.name, value=i.mention)
-            comands.append(i)
+            commands_list.append(i)
     await ctx.respond(embed=embed)
 
 
@@ -180,12 +180,12 @@ async def on_message(message):
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
-        embed = discord.Embed(color=COLOR_CODES["error"], title=f'Произошла ощибка!',
+        embed = discord.Embed(color=COLOR_CODES["error"], title=f'Произошла ошибка!',
                               description=f"Вы сможете использовать эту команду повторно через {round(error.retry_after, 2)} секунд")
         await ctx.send(embed=embed)
     elif isinstance(error, commands.NoPrivateMessage):
-        embed = discord.Embed(color=COLOR_CODES["error"], title=f'Произошла ощибка!',
-                              description=f"Эта команда предназначеня только для серверов.")
+        embed = discord.Embed(color=COLOR_CODES["error"], title=f'Произошла ошибка!',
+                              description=f"Эта команда предназначена только для серверов.")
         await ctx.send(embed=embed)
     elif isinstance(error, commands.CommandNotFound):
         pass
@@ -196,30 +196,30 @@ async def on_command_error(ctx, error):
 @bot.event
 async def on_application_command_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
-        embed = discord.Embed(color=COLOR_CODES["error"], title=f'Произошла ощибка!',
+        embed = discord.Embed(color=COLOR_CODES["error"], title=f'Произошла ошибка!',
                               description=f"Вы сможете использовать эту команду повторно через {round(error.retry_after, 2)} секунд")
         await ctx.respond(embed=embed, ephemeral=True)
     else:
         raise error
 
 
-@bot.slash_command(name=LOCAL["command_avatar_name"][DEFULT_LANG],
-                   description=LOCAL["command_avatar_description"][DEFULT_LANG],
+@bot.slash_command(name=LOCAL["command_avatar_name"][DEFAULT_LANG],
+                   description=LOCAL["command_avatar_description"][DEFAULT_LANG],
                    name_localizations=LOCAL["command_avatar_name"],
                    description_localizations=LOCAL["command_avatar_description"])
-async def avatar_(ctx, member: Option(discord.Member, name=LOCAL["command_avatar_option_member_name"][DEFULT_LANG],
-                                      description=LOCAL["command_avatar_option_member_description"][DEFULT_LANG],
+async def avatar_(ctx, member: Option(discord.Member, name=LOCAL["command_avatar_option_member_name"][DEFAULT_LANG],
+                                      description=LOCAL["command_avatar_option_member_description"][DEFAULT_LANG],
                                       name_localizations=LOCAL["command_avatar_option_member_name"],
                                       description_localizations=LOCAL["command_avatar_option_member_description"],
                                       required=False),
-                  ephemeral: Option(str, name=LOCAL["command_avatar_option_ephemeral_name"][DEFULT_LANG],
-                                    description=LOCAL["command_avatar_option_ephemeral_description"][DEFULT_LANG],
+                  ephemeral: Option(str, name=LOCAL["command_avatar_option_ephemeral_name"][DEFAULT_LANG],
+                                    description=LOCAL["command_avatar_option_ephemeral_description"][DEFAULT_LANG],
                                     name_localizations=LOCAL["command_avatar_option_ephemeral_name"],
                                     description_localizations=LOCAL["command_avatar_option_ephemeral_description"],
-                                    choices=(discord.OptionChoice(name=LOCAL["option_choice_yes"][DEFULT_LANG],
+                                    choices=(discord.OptionChoice(name=LOCAL["option_choice_yes"][DEFAULT_LANG],
                                                                   name_localizations=LOCAL["option_choice_yes"],
                                                                   value="1"),
-                                             discord.OptionChoice(name=LOCAL["option_choice_no"][DEFULT_LANG],
+                                             discord.OptionChoice(name=LOCAL["option_choice_no"][DEFAULT_LANG],
                                                                   name_localizations=LOCAL["option_choice_no"],
                                                                   value="0")), required=False)):
     author = member if member else ctx.author
@@ -229,12 +229,12 @@ async def avatar_(ctx, member: Option(discord.Member, name=LOCAL["command_avatar
     await ctx.respond(embed=embed, ephemeral=ephemeral)
 
 
-@bot.slash_command(name=LOCAL["command_dice_name"][DEFULT_LANG],
-                   description=LOCAL["command_dice_description"][DEFULT_LANG],
+@bot.slash_command(name=LOCAL["command_dice_name"][DEFAULT_LANG],
+                   description=LOCAL["command_dice_description"][DEFAULT_LANG],
                    name_localizations=LOCAL["command_dice_name"],
                    description_localizations=LOCAL["command_dice_description"])
-async def dice_(ctx, sides: Option(int, name=LOCAL["command_dice_option_sides_name"][DEFULT_LANG],
-                                   description=LOCAL["command_dice_option_sides_description"][DEFULT_LANG],
+async def dice_(ctx, sides: Option(int, name=LOCAL["command_dice_option_sides_name"][DEFAULT_LANG],
+                                   description=LOCAL["command_dice_option_sides_description"][DEFAULT_LANG],
                                    name_localizations=LOCAL["command_dice_option_sides_name"],
                                    description_localizations=LOCAL["command_dice_option_sides_description"],
                                    required=False, default=6, min_value=1)):
@@ -334,12 +334,11 @@ def main():
             bot.load_extension("cogs." + f[:-3])
 
     bot.help_command = CustomHelpCommand(
-        command_attrs={'name': "help", 'aliases': ["helpme", "помощь", "хелп"], 'help': "commnad_help_help"})
-    try:
-        bot.run(SETTINGS['token'])
-    finally:
-        with open("economy.json", mode="w", encoding="utf-8") as f:
-            f.write(json.dumps(economy_data, indent=2, ensure_ascii=False))
+        command_attrs={'name': "help", 'aliases': ["helpme", "помощь", "хелп"], 'help': "command_help_info"})
+
+    bot.run(SETTINGS['token'])
+    #with open("economy.json", mode="w", encoding="utf-8") as f:
+        #f.write(json.dumps(economy_data, indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":

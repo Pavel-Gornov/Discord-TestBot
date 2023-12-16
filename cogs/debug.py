@@ -4,7 +4,7 @@ from discord.ext import commands
 from storage import *
 import discord
 
-COG_NAME: final = "отлидки"
+COG_NAME: final = "отладки"
 
 
 class Test(commands.Cog):
@@ -28,7 +28,7 @@ class Test(commands.Cog):
     async def ping(self, ctx):
         await ctx.send(f"Pong! {round(self.bot.latency * 1000)}ms")
 
-    @commands.slash_command(name='очистка', description='Очищает сообщения, почеменные, как "офф-топ"', guild_ids=GUILD_IDS)
+    @commands.slash_command(name='очистка', description='Очищает сообщения, помеченные, как "офф-топ"')
     @discord.commands.default_permissions(administrator=True)
     @discord.commands.guild_only()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -38,10 +38,10 @@ class Test(commands.Cog):
         msgs = list()
         async for x in channel.history(limit=number):
             if ((x.content.startswith("//") or x.content.startswith("(("))
-                    #and "⭐" not in [i.emoji for i in x.reactions]
+                    and "⭐" not in [i.emoji for i in x.reactions]
                     and datetime.datetime.now(x.created_at.tzinfo) - x.created_at <= datetime.timedelta(days=14) and not x.pinned):
                 msgs.append(x)
-        await ctx.respond(f"Будет удлено {len(msgs)} сообщений.", delete_after=10)
+        await ctx.respond(f"Будет удалено {len(msgs)} сообщений.", delete_after=10)
         for i in range(0, len(msgs), 100):
             await channel.delete_messages(msgs[i:i+100], reason="Очистка")
 

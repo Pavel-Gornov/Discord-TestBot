@@ -2,7 +2,7 @@ from Token import *
 import json
 
 
-def load_lacale():
+def load_local():
     with open("locale.json", mode="r", encoding="utf-8") as f:
         return json.load(f)
 
@@ -23,10 +23,10 @@ REQUEST_CODES: final = (100, 101, 102, 103,
                         421, 422, 423, 424, 425, 426, 429, 431, 444, 450, 451, 497,
                         498, 499, 500, 501, 502, 503, 504, 506, 507, 508, 509, 510,
                         511, 521, 522, 523, 525, 599)
-SETTINGS: final = {'token': TOKEN, 'bot': BOT_NAME, 'id': BOT_ID, 'prefix': '|'}
+SETTINGS: final = {'token': TOKEN, 'bot': BOT_NAME, 'id': BOT_ID, 'prefix': 'd|'}
 GUILD_IDS: final = [1076117733428711434, 1055895511359574108]
 BOT_ICON_URL: final = "https://media.discordapp.net/attachments/1055896512053399623/1150820899231109271/-.png"
 LANGS: final = ("ru", "en-US")
-DEFULT_LANG: final = "ru"
-LOCAL: final = load_lacale()
+DEFAULT_LANG: final = "ru"
+LOCAL: final = load_local()
 economy_data = economy()

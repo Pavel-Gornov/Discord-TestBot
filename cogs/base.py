@@ -7,7 +7,7 @@ from discord.ext import commands
 
 from storage import *
 
-COG_NAME: final = "основых команд"
+COG_NAME: final = "основных команд"
 
 
 class BaseCommands(commands.Cog):
@@ -18,7 +18,7 @@ class BaseCommands(commands.Cog):
     async def on_ready(self):
         print(f"Модуль {COG_NAME} успешно загружен!")
 
-    @commands.command(aliases=["error", "hstat" "httpstat", "сеть", "код", "статус"], help="commnad_http_info")
+    @commands.command(aliases=["error", "hstat" "httpstat", "сеть", "код", "статус"], help="command_http_info")
     async def http(self, ctx, status_code: Optional[int] = 200):
         if status_code in REQUEST_CODES:
             await ctx.reply(f"https://http.cat/{status_code}")
@@ -47,7 +47,7 @@ class BaseCommands(commands.Cog):
     async def hello(self, ctx):
         await ctx.send(f'{random.choice(GREETINGS_LIST)}, {ctx.message.author.mention}!')
 
-    @commands.command(aliases=["c", "кот", "Кот", "Cat", "🐱"], help="commnad_cat_info")
+    @commands.command(aliases=["c", "кот", "Кот", "Cat", "🐱"], help="command_cat_info")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def cat(self, ctx):
         async with ctx.channel.typing():
@@ -58,7 +58,7 @@ class BaseCommands(commands.Cog):
             embed.set_image(url=response[0]["url"])
         await ctx.reply(embed=embed)
 
-    @commands.command(aliases=["d", "собака", "Пёс", "Собака", "Dog", "🐶"], help="commnad_dog_info")
+    @commands.command(aliases=["d", "собака", "Пёс", "Собака", "Dog", "🐶"], help="command_dog_info")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def dog(self, ctx):
         async with ctx.channel.typing():
@@ -69,7 +69,7 @@ class BaseCommands(commands.Cog):
             embed.set_image(url=response[0]["url"])
         await ctx.reply(embed=embed)
 
-    @commands.command(aliases=["лиса", "лис", "Fox", "Лис", "Лиса", "🦊"], help="commnad_fox_info")
+    @commands.command(aliases=["лиса", "лис", "Fox", "Лис", "Лиса", "🦊"], help="command_fox_info")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def fox(self, ctx):
         async with ctx.channel.typing():

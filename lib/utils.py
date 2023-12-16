@@ -1,7 +1,7 @@
 import multiprocessing
 from typing import Callable
 import datetime
-from storage import DEFULT_LANG, LANGS
+from storage import DEFAULT_LANG, LANGS
 
 import discord
 
@@ -26,7 +26,7 @@ def makeDSTimestamp(year, month, day, hour, minute, second, timezone, mode):
 # TODO: Добавить настройки языка сервера и использовать их в этой функции.
 def get_guild_lang(guild: discord.Guild) -> str:
     if not guild or guild.preferred_locale not in LANGS:
-        return DEFULT_LANG
+        return DEFAULT_LANG
     return guild.preferred_locale
 
 

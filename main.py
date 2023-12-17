@@ -4,7 +4,7 @@ import random
 import aiohttp
 from discord import Option
 
-from lib.utils import makeDSTimestamp, get_guild_lang, is_emoji
+from lib.utils import get_guild_lang, is_emoji
 from discord.ext import commands
 import discord
 from storage import *
@@ -116,39 +116,34 @@ class CustomHelpCommand(commands.HelpCommand):
 async def help_(ctx: discord.ApplicationContext):
     language = get_guild_lang(ctx.guild)
     embed = discord.Embed(title=LOCAL["help_help"][language])
-    commands_list = list()
-    for i in bot.application_commands:
-        if i not in commands_list and isinstance(i, discord.SlashCommand):
-            if ctx.guild:
-                if i.guild_ids:
-                    if ctx.guild.id in i.guild_ids:
-                        embed.add_field(name=i.name, value=i.mention)
+    for cog in bot.cogs.values():
+        commands_list = list()
+        for c in cog.walk_commands():
+            if isinstance(c, discord.SlashCommand):
+                if ctx.guild:
+                    if c.guild_ids:
+                        if ctx.guild.id in c.guild_ids:
+                            commands_list.append(c.mention)
+                    else:
+                        commands_list.append(c.mention)
                 else:
-                    embed.add_field(name=i.name, value=i.mention)
+                    if not c.guild_only:
+                        commands_list.append(c)
+        embed.add_field(name=cog.qualified_name, value=" ".join(commands_list), inline=False)
+    commands_list = list()
+    for c in bot.application_commands:
+        if isinstance(c, discord.SlashCommand) and c.cog is None:
+            if ctx.guild:
+                if c.guild_ids:
+                    if ctx.guild.id in c.guild_ids:
+                        commands_list.append(c.mention)
+                else:
+                    commands_list.append(c.mention)
             else:
-                if not i.guild_only:
-                    embed.add_field(name=i.name, value=i.mention)
-            commands_list.append(i)
+                if not c.guild_only:
+                    commands_list.append(c)
+    embed.add_field(name="None", value=" ".join(commands_list), inline=False)
     await ctx.respond(embed=embed)
-
-
-@bot.slash_command(name="метка-времени", description="Что-то делает")
-async def time_(ctx, year: Option(int, description="Год для даты", required=False) = 1970,
-                month: Option(int, description="Номер месяца года", required=False) = 1,
-                day: Option(int, description="Номер дня месяца", required=False) = 1,
-                hour: Option(int, description="Час дня", required=False) = 0,
-                minute: Option(int, description="Минута часа", required=False) = 0,
-                second: Option(int, description="Секунда минуты", required=False) = 0,
-                timezone: Option(int, description="Временная зона GMT+n", required=False) = 0,
-                mode: Option(str, description="Тип отображения", choices=("R — Оставшееся время",
-                                                                          "d — Короткая запись даты только цифрами",
-                                                                          "D — Дата с подписью месяца словом",
-                                                                          "f — Дата и время",
-                                                                          "F — Полные день недели, дата и время",
-                                                                          "t — Часы и минуты",
-                                                                          "T — Часы, минуты и секунды"),
-                             required=False) = "R"):
-    await ctx.respond(makeDSTimestamp(year, month, day, hour, minute, second, timezone, mode))
 
 
 @bot.event
@@ -310,31 +305,37 @@ async def vote_(ctx: discord.ApplicationContext,
                       ephemeral=True)
 
 
-@bot.slash_command(name='сервер', description="Информация о сервере. (в разработке)")
+@bot.slash_command(name=LOCAL["command_server_name"][DEFAULT_LANG], description=LOCAL["command_server_description"][DEFAULT_LANG],
+                   name_localizations=LOCAL["command_server_name"], description_localizations=LOCAL["command_server_description"])
 @discord.commands.guild_only()
+@commands.cooldown(1, 5, commands.BucketType.user)
 async def server_(ctx: discord.ApplicationContext):
+    language = get_guild_lang(ctx.guild)
     guild = ctx.guild
     bot_count = len([m for m in guild.members if m.bot])
-    embed = discord.Embed(title=f"Сервер {guild.name}", description=f"Описание: {guild.description}",
+    embed = discord.Embed(title=LOCAL["server_title"][language].format(guild.name),
+                          description=LOCAL["server_description"][language].format(
+                              guild.description if guild.description else LOCAL['description_none'][language]),
                           colour=COLOR_CODES["bot"])
     embed.set_thumbnail(url=guild.icon.url)
-    embed.add_field(name="Участники:", value=f":globe_with_meridians: Всего: **{guild.member_count}** \n"
-                                                     f":green_circle: Люди: **{guild.member_count - bot_count}**\n"
-                                                     f":gear: Боты: **{bot_count}**")
-    embed.add_field(name="Разное:", value=f'🟪 Уровень буста: **{guild.premium_tier}**\n'
-                                          f'🟣 Количество бустов: **{guild.premium_subscription_count}**\n'
-                                          f':label: Тип сервера: **{"Большой" if guild.large else "Малый"}**\n'
-                                          f'💾 Файлы: до {round(guild.filesize_limit / 1024 ** 2)} Мб')
-    embed.add_field(name="Каналы:", value=f"🗄️ Всего: **{len(guild.channels) - len(guild.categories)}**\n"
-                                          f"💬 Текстовые: **{len(guild.text_channels)}**\n"
-                                          f"🔊 Голосовые: **{len(guild.voice_channels)}**\n"
-                                          f"🗃️ Форумы: **{len(guild.forum_channels)}**\n"
-                                          f"📣 Объявления: **{len([c for c in guild.text_channels if c.news])}**")
-    embed.add_field(name="Владелец:", value=f"{guild.owner.mention}")
-    embed.add_field(name="Уровень проверки:", value=f"{guild.verification_level}")
-    embed.add_field(name="Дата основания:", value=f"<t:{int(guild.created_at.timestamp())}:D>\n"
-                                                  f"<t:{int(guild.created_at.timestamp())}:R>")
-    embed.set_footer(text=f"ID: {guild.id}")
+    embed.add_field(name=LOCAL["server_members_name"][language],
+                    value=LOCAL["server_members_value"][language].format(guild.member_count,
+                                                                         guild.member_count - bot_count, bot_count))
+    temp = round(guild.filesize_limit / 1024 ** 2)
+    embed.add_field(name=LOCAL["server_miscellaneous_name"][language],
+                    value=LOCAL["server_miscellaneous_value"][language].format(guild.premium_tier,
+                                                                               guild.premium_subscription_count,
+                                                                               LOCAL["server_size_large"][language] if guild.large else LOCAL["server_size_small"][language],
+                                                                               25 if temp == 8 else temp))
+    embed.add_field(name=LOCAL["server_channels_name"][language],
+                    value=LOCAL["server_channels_value"][language].format(len(guild.channels) - len(guild.categories), len(guild.text_channels),
+                    len(guild.voice_channels), len(guild.forum_channels), len([c for c in guild.text_channels if c.news])))
+    embed.add_field(name=LOCAL["server_owner_name"][language], value=f"{guild.owner.mention}")
+    embed.add_field(name=LOCAL["server_verification_level_name"][language],
+                    value=f"{LOCAL[f'verification_{str(guild.verification_level)}'][language]}")
+    embed.add_field(name=LOCAL["server_created_at_name"][language],
+                    value=f"<t:{int(guild.created_at.timestamp())}:D>\n<t:{int(guild.created_at.timestamp())}:R>")
+    embed.set_footer(text=LOCAL["server_footer"][language].format(guild.id, guild.preferred_locale))
 
     await ctx.respond(embed=embed)
 
@@ -354,7 +355,6 @@ def main():
 
     bot.help_command = CustomHelpCommand(
         command_attrs={'name': "help", 'aliases': ["helpme", "помощь", "хелп"], 'help': "command_help_info"})
-
     bot.run(SETTINGS['token'])
     with open("economy.json", mode="w", encoding="utf-8") as f:
         f.write(json.dumps(economy_data, indent=2, ensure_ascii=False))

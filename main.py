@@ -25,9 +25,6 @@ class CustomHelpCommand(commands.HelpCommand):
             command = self.cog_filter(command)
         await super().command_callback(ctx=ctx, command=command)
 
-    def get_command_signature(self, command):
-        return f"{self.context.clean_prefix}{command.qualified_name} {command.signature}"
-
     async def send_bot_help(self, mapping):
         language = get_guild_lang(self.context.guild)
 
@@ -36,10 +33,10 @@ class CustomHelpCommand(commands.HelpCommand):
         for cog, bot_commands in mapping.items():
             command_signatures = list()
             for c in bot_commands:
-                if isinstance(c, discord.ext.commands.Command):
+                if isinstance(c, discord.ext.commands.Command) and not c.hidden:
                     if c.aliases:
                         command_signatures.append(
-                            f"`{self.context.clean_prefix}{c.qualified_name}` {c.signature}")
+                            f"`{self.context.clean_prefix}{c.qualified_name}` {LOCAL[c.brief][language] if c.brief else ''}")
                     else:
                         command_signatures.append(f"`{self.context.clean_prefix}{c.qualified_name}`")
             if command_signatures:
@@ -56,17 +53,24 @@ class CustomHelpCommand(commands.HelpCommand):
     async def send_command_help(self, command):
         language = get_guild_lang(self.context.guild)
 
-        embed = discord.Embed(title=f"{LOCAL['help_command'][language]} {self.get_command_signature(command)}",
-                              colour=COLOR_CODES["bot"])
+        embed = discord.Embed(
+            title=f"{LOCAL['help_command'][language]} `{self.context.clean_prefix}{command.qualified_name}` {LOCAL[command.brief][language] if command.brief else ''}",
+            colour=COLOR_CODES["bot"])
         embed.set_thumbnail(url=BOT_ICON_URL)
-        if command.help:
-            embed.description = LOCAL[command.help][language]
+        if command.description:
+            embed.description = LOCAL[command.description][language]
         else:
             embed.description = LOCAL["help_no_info"][language]
+        if command.help:
+            s = ""
+            for i in LOCAL[command.help][language].split("\n"):
+                s += f"`{self.context.clean_prefix}{command.qualified_name}` {i}\n"
+            embed.add_field(name="Примеры использования:",
+                            value=s, inline=False)
+
         if command.aliases:
             embed.add_field(name=LOCAL["help_aliases"][language],
-                            value=f'{command.qualified_name}, {", ".join(command.aliases)}',
-                            inline=False)
+                            value=f'{command.qualified_name}, {", ".join(command.aliases)}', inline=False)
 
         await self.get_destination().send(embed=embed)
 
@@ -100,9 +104,10 @@ class CustomHelpCommand(commands.HelpCommand):
 
         if filtered_commands:
             for command in filtered_commands:
-                embed.add_field(name=self.get_command_signature(command),
-                                value=LOCAL[command.help][language] if command.help else LOCAL["help_no_info"][
-                                    language])
+                embed.add_field(
+                    name=f"`{self.context.clean_prefix}{command.qualified_name}` {LOCAL[command.brief][language] if command.brief else ''}",
+                    value=LOCAL[command.description][language] if command.description else LOCAL["help_no_info"][
+                        language])
 
         await self.get_destination().send(embed=embed)
 
@@ -110,40 +115,6 @@ class CustomHelpCommand(commands.HelpCommand):
         language = get_guild_lang(self.context.guild)
 
         return LOCAL["help_command_not_found"][language].format(string)
-
-
-@bot.slash_command(name="help", description="")
-async def help_(ctx: discord.ApplicationContext):
-    language = get_guild_lang(ctx.guild)
-    embed = discord.Embed(title=LOCAL["help_help"][language])
-    for cog in bot.cogs.values():
-        commands_list = list()
-        for c in cog.walk_commands():
-            if isinstance(c, discord.SlashCommand):
-                if ctx.guild:
-                    if c.guild_ids:
-                        if ctx.guild.id in c.guild_ids:
-                            commands_list.append(c.mention)
-                    else:
-                        commands_list.append(c.mention)
-                else:
-                    if not c.guild_only:
-                        commands_list.append(c)
-        embed.add_field(name=cog.qualified_name, value=" ".join(commands_list), inline=False)
-    commands_list = list()
-    for c in bot.application_commands:
-        if isinstance(c, discord.SlashCommand) and c.cog is None:
-            if ctx.guild:
-                if c.guild_ids:
-                    if ctx.guild.id in c.guild_ids:
-                        commands_list.append(c.mention)
-                else:
-                    commands_list.append(c.mention)
-            else:
-                if not c.guild_only:
-                    commands_list.append(c)
-    embed.add_field(name="None", value=" ".join(commands_list), inline=False)
-    await ctx.respond(embed=embed)
 
 
 @bot.event
@@ -177,11 +148,15 @@ async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         embed = discord.Embed(color=COLOR_CODES["error"], title=f'Произошла ошибка!',
                               description=f"Вы сможете использовать эту команду повторно через {round(error.retry_after, 2)} секунд")
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
     elif isinstance(error, commands.NoPrivateMessage):
         embed = discord.Embed(color=COLOR_CODES["error"], title=f'Произошла ошибка!',
                               description=f"Эта команда предназначена только для серверов.")
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
+    elif isinstance(error, commands.errors.GuildNotFound):
+        embed = discord.Embed(color=COLOR_CODES["error"], title=f'Произошла ошибка!',
+                              description=f'Сервер "{error.argument}" не найден.')
+        await ctx.reply(embed=embed)
     elif isinstance(error, commands.CommandNotFound):
         pass
     else:
@@ -199,18 +174,18 @@ async def on_application_command_error(ctx, error):
 
 
 @bot.slash_command(name=LOCAL["command_avatar_name"][DEFAULT_LANG],
-                   description=LOCAL["command_avatar_description"][DEFAULT_LANG],
+                   description=LOCAL["command/_avatar_description"][DEFAULT_LANG],
                    name_localizations=LOCAL["command_avatar_name"],
-                   description_localizations=LOCAL["command_avatar_description"])
-async def avatar_(ctx, member: Option(discord.Member, name=LOCAL["command_avatar_option_member_name"][DEFAULT_LANG],
-                                      description=LOCAL["command_avatar_option_member_description"][DEFAULT_LANG],
-                                      name_localizations=LOCAL["command_avatar_option_member_name"],
-                                      description_localizations=LOCAL["command_avatar_option_member_description"],
+                   description_localizations=LOCAL["command/_avatar_description"])
+async def avatar_(ctx, member: Option(discord.Member, name=LOCAL["command/_avatar_option_member_name"][DEFAULT_LANG],
+                                      description=LOCAL["command/_avatar_option_member_description"][DEFAULT_LANG],
+                                      name_localizations=LOCAL["command/_avatar_option_member_name"],
+                                      description_localizations=LOCAL["command/_avatar_option_member_description"],
                                       required=False),
-                  ephemeral: Option(str, name=LOCAL["command_avatar_option_ephemeral_name"][DEFAULT_LANG],
-                                    description=LOCAL["command_avatar_option_ephemeral_description"][DEFAULT_LANG],
-                                    name_localizations=LOCAL["command_avatar_option_ephemeral_name"],
-                                    description_localizations=LOCAL["command_avatar_option_ephemeral_description"],
+                  ephemeral: Option(str, name=LOCAL["command/_avatar_option_ephemeral_name"][DEFAULT_LANG],
+                                    description=LOCAL["command/_avatar_option_ephemeral_description"][DEFAULT_LANG],
+                                    name_localizations=LOCAL["command/_avatar_option_ephemeral_name"],
+                                    description_localizations=LOCAL["command/_avatar_option_ephemeral_description"],
                                     choices=(discord.OptionChoice(name=LOCAL["option_choice_yes"][DEFAULT_LANG],
                                                                   name_localizations=LOCAL["option_choice_yes"],
                                                                   value="1"),
@@ -224,14 +199,14 @@ async def avatar_(ctx, member: Option(discord.Member, name=LOCAL["command_avatar
     await ctx.respond(embed=embed, ephemeral=ephemeral)
 
 
-@bot.slash_command(name=LOCAL["command_dice_name"][DEFAULT_LANG],
-                   description=LOCAL["command_dice_description"][DEFAULT_LANG],
-                   name_localizations=LOCAL["command_dice_name"],
-                   description_localizations=LOCAL["command_dice_description"])
-async def dice_(ctx, sides: Option(int, name=LOCAL["command_dice_option_sides_name"][DEFAULT_LANG],
-                                   description=LOCAL["command_dice_option_sides_description"][DEFAULT_LANG],
-                                   name_localizations=LOCAL["command_dice_option_sides_name"],
-                                   description_localizations=LOCAL["command_dice_option_sides_description"],
+@bot.slash_command(name=LOCAL["command/_dice_name"][DEFAULT_LANG],
+                   description=LOCAL["command/_dice_description"][DEFAULT_LANG],
+                   name_localizations=LOCAL["command/_dice_name"],
+                   description_localizations=LOCAL["command/_dice_description"])
+async def dice_(ctx, sides: Option(int, name=LOCAL["command/_dice_option_sides_name"][DEFAULT_LANG],
+                                   description=LOCAL["command/_dice_option_sides_description"][DEFAULT_LANG],
+                                   name_localizations=LOCAL["command/_dice_option_sides_name"],
+                                   description_localizations=LOCAL["command/_dice_option_sides_description"],
                                    required=False, default=6, min_value=1)):
     await ctx.respond(random.randint(1, sides))
 
@@ -305,8 +280,10 @@ async def vote_(ctx: discord.ApplicationContext,
                       ephemeral=True)
 
 
-@bot.slash_command(name=LOCAL["command_server_name"][DEFAULT_LANG], description=LOCAL["command_server_description"][DEFAULT_LANG],
-                   name_localizations=LOCAL["command_server_name"], description_localizations=LOCAL["command_server_description"])
+@bot.slash_command(name=LOCAL["command/_server_name"][DEFAULT_LANG],
+                   description=LOCAL["command/_server_description"][DEFAULT_LANG],
+                   name_localizations=LOCAL["command/_server_name"],
+                   description_localizations=LOCAL["command/_server_description"])
 @discord.commands.guild_only()
 @commands.cooldown(1, 5, commands.BucketType.user)
 async def server_(ctx: discord.ApplicationContext):
@@ -325,11 +302,17 @@ async def server_(ctx: discord.ApplicationContext):
     embed.add_field(name=LOCAL["server_miscellaneous_name"][language],
                     value=LOCAL["server_miscellaneous_value"][language].format(guild.premium_tier,
                                                                                guild.premium_subscription_count,
-                                                                               LOCAL["server_size_large"][language] if guild.large else LOCAL["server_size_small"][language],
+                                                                               LOCAL["server_size_large"][
+                                                                                   language] if guild.large else
+                                                                               LOCAL["server_size_small"][language],
                                                                                25 if temp == 8 else temp))
     embed.add_field(name=LOCAL["server_channels_name"][language],
-                    value=LOCAL["server_channels_value"][language].format(len(guild.channels) - len(guild.categories), len(guild.text_channels),
-                    len(guild.voice_channels), len(guild.forum_channels), len([c for c in guild.text_channels if c.news])))
+                    value=LOCAL["server_channels_value"][language].format(len(guild.channels) - len(guild.categories),
+                                                                          len(guild.text_channels),
+                                                                          len(guild.voice_channels),
+                                                                          len(guild.forum_channels),
+                                                                          len([c for c in guild.text_channels if
+                                                                               c.news])))
     embed.add_field(name=LOCAL["server_owner_name"][language], value=f"{guild.owner.mention}")
     embed.add_field(name=LOCAL["server_verification_level_name"][language],
                     value=f"{LOCAL[f'verification_{str(guild.verification_level)}'][language]}")
@@ -337,6 +320,32 @@ async def server_(ctx: discord.ApplicationContext):
                     value=f"<t:{int(guild.created_at.timestamp())}:D>\n<t:{int(guild.created_at.timestamp())}:R>")
     embed.set_footer(text=LOCAL["server_footer"][language].format(guild.id, guild.preferred_locale))
 
+    await ctx.respond(embed=embed)
+
+
+@bot.slash_command(name="help", description="")
+async def help_(ctx: discord.ApplicationContext):
+    language = get_guild_lang(ctx.guild)
+    embed = discord.Embed(title=LOCAL["help_help"][language])
+    commands_lists = {None: []}
+    for cog in bot.cogs.keys():
+        commands_lists[cog] = []
+    for c in bot.walk_application_commands():
+        if isinstance(c, discord.SlashCommand):
+            if ctx.guild:
+                if c.guild_ids:
+                    if ctx.guild.id in c.guild_ids:
+                        i = c.cog if not c.cog else c.cog.qualified_name
+                        if c.mention not in commands_lists[i]:
+                            commands_lists[i].append(c.mention)
+                else:
+                    commands_lists[c.cog if not c.cog else c.cog.qualified_name].append(c.mention)
+            else:
+                if not c.guild_only:
+                    commands_lists[c.cog if not c.cog else c.cog.qualified_name].append(c.mention)
+    for k, v in commands_lists.items():
+        if v:
+            embed.add_field(name=str(k), value=" ".join(v), inline=False)
     await ctx.respond(embed=embed)
 
 
@@ -350,11 +359,13 @@ async def avatar_msg_command(ctx, message):
 
 def main():
     for f in os.listdir("./cogs"):
-        if f.endswith("py"):
+        if f.endswith("py") and not f == "economy.py":
             bot.load_extension("cogs." + f[:-3])
-
     bot.help_command = CustomHelpCommand(
-        command_attrs={'name': "help", 'aliases': ["helpme", "помощь", "хелп"], 'help': "command_help_info"})
+        command_attrs={'name': "help", 'aliases': ["helpme", "помощь", "хелп"],
+                       'help': "command_help_examples",
+                       'description': "command_help_description",
+                       'brief': "command_help_args"})
     bot.run(SETTINGS['token'])
     with open("economy.json", mode="w", encoding="utf-8") as f:
         f.write(json.dumps(economy_data, indent=2, ensure_ascii=False))

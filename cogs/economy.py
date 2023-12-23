@@ -192,8 +192,7 @@ class BusinessSkillsBranchMainUI:
         self.view = BusinessSkillsBranchMainView(user_id, buttons)
 
     def _make_embed(self):
-        embed = discord.Embed()
-
+        embed = discord.Embed(title="Ветка 1", description=f"{ECONOMY_EMOJIS['t1']}")
         return embed
 
 
@@ -268,7 +267,7 @@ class Economy(commands.Cog):
                                                   description=f"У вас нет бизнеса. Используйте </бизнес-создать:1178417237443481712>"),
                               view=view)
 
-    @commands.slash_command(name="бизнес-создать", guild_ids=[1076117733428711434, 1055895511359574108])
+    @commands.slash_command(name="бизнес-создать", guild_ids=[1055895511359574108, 1076117733428711434])
     @discord.commands.guild_only()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def business_1(self, ctx,

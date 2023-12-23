@@ -1,18 +1,18 @@
 {
-  "command_dice_name": {"en-US": "dice", "ru": "кубик"},
-  "command_dice_description": {"en-US": "simple n-side dice", "ru": "Простой n-гранный кубик"},
-  "command_dice_option_sides_name": {"en-US": "sides", "ru": "грани"},
-  "command_dice_option_sides_description": {"en-US": "Number of sides", "ru": "Количество граней кубика"},
+  "command/_dice_name": {"en-US": "dice", "ru": "кубик"},
+  "command/_dice_description": {"en-US": "simple n-side dice", "ru": "Простой n-гранный кубик"},
+  "command/_dice_option_sides_name": {"en-US": "sides", "ru": "грани"},
+  "command/_dice_option_sides_description": {"en-US": "Number of sides", "ru": "Количество граней кубика"},
 
   "command_avatar_name": {"en-US": "avatar", "ru": "аватар"},
-  "command_avatar_description": {"en-US": "Sends the user's profile picture.", "ru": "Отправляет аватар выбранного пользователя"},
-  "command_avatar_option_member_name": {"en-US": "member", "ru": "участник"},
-  "command_avatar_option_member_description": {"en-US": "Guilt member", "ru": "Участник сервера"},
-  "command_avatar_option_ephemeral_name": {"en-US": "ephemeral", "ru": "видимость"},
-  "command_avatar_option_ephemeral_description": {"en-US": "Will the respond be visible to everyone?", "ru": "Будет ли видно ответ только Вам?"},
+  "command/_avatar_description": {"en-US": "Sends the user's profile picture.", "ru": "Отправляет аватар выбранного пользователя"},
+  "command/_avatar_option_member_name": {"en-US": "member", "ru": "участник"},
+  "command/_avatar_option_member_description": {"en-US": "Guilt member", "ru": "Участник сервера"},
+  "command/_avatar_option_ephemeral_name": {"en-US": "ephemeral", "ru": "видимость"},
+  "command/_avatar_option_ephemeral_description": {"en-US": "Will the respond be visible to everyone?", "ru": "Будет ли видно ответ только Вам?"},
 
-  "command_server_name": {"en-US": "server", "ru": "сервер"},
-  "command_server_description": {"en-US": "Server information", "ru": "Информация о сервере"},
+  "command/_server_name": {"en-US": "server", "ru": "сервер"},
+  "command/_server_description": {"en-US": "Server information", "ru": "Информация о сервере"},
   "server_title": {"en-US": "Server {0}", "ru": "Сервер {0}"},
   "server_description": {"en-US": "Description: {0}", "ru": "Описание: {0}"},
   "server_members_name": {"en-US": "Members:", "ru": "Участники:"},
@@ -42,17 +42,37 @@
   "help_command": {"en-US": "Command", "ru": "Команда"},
   "help_command_not_found": {"en-US": "No command called \"{0}\" found.", "ru": "Команда \"{0}\" не найдена."},
 
-  "command_help_info": {"en-US": "Bot commands help.", "ru": "Помощь по командам Бота и их группам."},
-  "command_cat_info": {"en-US": "Sends pictures with cats to the chat! \uD83D\uDC31", "ru": "Отправляет в чат картинки с котиками! \uD83D\uDC31"},
-  "command_dog_info": {"en-US": "Sends pictures with dogs to the chat! \uD83D\uDC36", "ru": "Отправляет в чат картинки с собачками! \uD83D\uDC36"},
-  "command_fox_info": {"en-US": "Sends pictures with foxes to the chat! \uD83E\uDD8A", "ru": "Отправляет в чат картинки с лисичками! \uD83E\uDD8A"},
-  "command_http_info": {"en-US": "Web request status codes in the form of cat memes! \uD83D\uDC31", "ru": "Коды состояния web-запросов в виде мемов с котиками! \uD83D\uDC31"},
-  "command_avatar_info": {"en-US": "The simplest command to get a user's avatar. Accepts id or mention as argument.", "ru": "Простейшая команд для получения аватара пользователя. Принимает как аргумент id или упоминание."},
-  "command_random_info": {"en-US": "Returns a random one of the arguments. Delimiter - \";\"", "ru": "Возвращает случайный из аргументов. Разделитель — \";\""},
-  "command_me_info": {"en-US": "Sends a message as Bot. Works only in guilds and requires guild administrator permission.", "ru": "Отправляет сообщение от лица Бота. Работает только на серверах и требует права администратора сервера."},
-  "command_hello_info": {"en-US": "A simple greeting command.", "ru": "Простенькая команда приветствия от Бота."},
+  "command_help_description": {"en-US": "Bot commands help.", "ru": "Помощь по командам Бота и их группам."},
+  "command_help_examples": {"en-US": "cat\nBase Commands", "ru": "кот\nОсновные команды"},
+  "command_help_args": {"en-US": "[command|command group]", "ru": "[команда|группа команд]"},
+
+  "command_cat_description": {"en-US": "Sends pictures with cats to the chat! \uD83D\uDC31", "ru": "Отправляет в чат картинки с котиками! \uD83D\uDC31"},
+  "command_dog_description": {"en-US": "Sends pictures with dogs to the chat! \uD83D\uDC36", "ru": "Отправляет в чат картинки с собачками! \uD83D\uDC36"},
+  "command_fox_description": {"en-US": "Sends pictures with foxes to the chat! \uD83E\uDD8A", "ru": "Отправляет в чат картинки с лисичками! \uD83E\uDD8A"},
+
+  "command_http_description": {"en-US": "Web request status codes in the form of cat memes! \uD83D\uDC31", "ru": "Коды состояния web-запросов в виде мемов с котиками! \uD83D\uDC31"},
+  "command_http_examples": {"en-US": "\n100\n400", "ru": "\n100\n400"},
+  "command_http_args": {"en-US": "[status code]", "ru": "[код статуса]"},
+
+  "command_avatar_description": {"en-US": "The simplest command to get a user's avatar. Accepts id or mention as argument.", "ru": "Простейшая команд для получения аватара пользователя. Принимает как аргумент id или упоминание."},
+  "command_avatar_examples": {"en-US": "\n@name\nuser id", "ru": "\n@имя\nid пользователя"},
+  "command_avatar_args": {"en-US": "[user|id]", "ru": "[пользователь|id]"},
+
+  "command_random_description": {"en-US": "Returns a random one of the arguments. Delimiter - \";\"", "ru": "Возвращает случайный из аргументов. Разделитель — \";\""},
+  "command_random_examples": {"en-US": "Option 1;Option 2", "ru": "Вариант 1;Вариант 2"},
+  "command_random_args": {"en-US": "[args]", "ru": "[аргументы]"},
+
+  "command_me_description": {"en-US": "Sends a message as Bot. Works only in guilds and requires guild administrator permission.", "ru": "Отправляет сообщение от лица Бота. Работает только на серверах и требует права администратора сервера."},
+  "command_me_examples": {"en-US": "Hi!", "ru": "Приветик!"},
+  "command_me_args": {"en-US": "[message]", "ru": "[сообщение]"},
+
+  "command_hello_description": {"en-US": "A simple greeting command.", "ru": "Простенькая команда приветствия от Бота."},
+
+  "command_server_description": {"en-US": "Various information and statistics of the current server.", "ru": "Разная информация и статистика текущего сервера."},
+  "command_server_examples": {"en-US": "\nserver name\nserver id", "ru": "\nимя сервера\nid сервера"},
+  "command_server_args": {"en-US": "[server]", "ru": "[сервер]"},
+
   "command_calculate_info": {"en-US": "Calculates mathematical expressions of varying levels of complexity. The command is able to work with complex numbers and more. ~~Please don't break it.~~", "ru": "Вычисляет математические выражения разного уровня сложности. Команда способна работать с комплексными числами и не только. ~~Пожалуйста, не ломайте её.~~"},
-  "command_server_info": {"en-US": "Various information and statistics of the current server.", "ru": "Разная информация и статистика текущего сервера."},
 
   "cogs": {
     "BaseCommands": {"en-US": "Base Commands", "ru": "Основные команды"},

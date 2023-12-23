@@ -19,12 +19,15 @@ class BaseCommands(commands.Cog):
     async def on_ready(self):
         print(f"Модуль {COG_NAME} успешно загружен!")
 
-    @commands.command(aliases=["сервер", "guild", "серв"], help="command_server_info")
+    @commands.command(aliases=["сервер", "guild", "серв"], description="command_server_description",
+                      help="command_server_examples", brief="command_server_args")
     @discord.commands.guild_only()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def server(self, ctx):
+    async def server(self, ctx, *, guild: commands.GuildConverter = None):
         language = get_guild_lang(ctx.guild)
-        guild = ctx.guild
+        if guild is None:
+            guild = ctx.guild
+
         bot_count = len([m for m in guild.members if m.bot])
         embed = discord.Embed(title=LOCAL["server_title"][language].format(guild.name),
                               description=LOCAL["server_description"][language].format(
@@ -56,36 +59,42 @@ class BaseCommands(commands.Cog):
 
         await ctx.reply(embed=embed)
 
-    @commands.command(aliases=["error", "hstat" "httpstat", "сеть", "код", "статус"], help="command_http_info")
+    @commands.command(aliases=["error", "hstat" "httpstat", "сеть", "код", "статус"],
+                      description="command_http_description", help="command_http_examples", brief="command_http_args")
     async def http(self, ctx, status_code: Optional[int] = 200):
         if status_code in REQUEST_CODES:
             await ctx.reply(f"https://http.cat/{status_code}")
         else:
             await ctx.reply("Нет такого кода.")
 
-    @commands.command(aliases=["ava", "ава", "аватарка", "аватар"], help="command_avatar_info")
+    @commands.command(aliases=["ava", "ава", "аватарка", "аватар"], description="command_avatar_description",
+                      help="command_avatar_examples", brief="command_avatar_args")
     async def avatar(self, ctx, user: Optional[discord.User]):
-        user = user if user else ctx.message.author
+        if user is None:
+            user = ctx.message.author
         embed = discord.Embed(color=COLOR_CODES["bot"], title=f'Аватар {user}', description=f"id: {user.id}")
         embed.set_image(url=user.avatar.url)
         await ctx.reply(embed=embed)
 
-    @commands.command(aliases=["rand", "ранд", "случайный", "случ"], help="command_random_info")
+    @commands.command(aliases=["rand", "ранд", "случайный", "случ"], description="command_random_description",
+                      help="command_random_examples", brief="command_random_args")
     async def random(self, ctx, *, args):
         await ctx.reply(random.choice(args.split(";")))
 
-    @commands.command(aliases=["m", "я", "сообщение"], help="command_me_info")
+    @commands.command(aliases=["m", "я", "сообщение"], description="command_me_description", help="command_me_examples",
+                      brief="command_me_args", hidden=True)
     @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def me(self, ctx, *, message):
         await ctx.send(message, reference=ctx.message.reference)
         await ctx.message.delete()
 
-    @commands.command(aliases=["hi", "hey", "Привет", "привет", "приветствие"], help="command_hello_info")
+    @commands.command(aliases=["hi", "hey", "Привет", "привет", "приветствие"], description="command_hello_description",
+                      hidden=True)
     async def hello(self, ctx):
         await ctx.send(f'{random.choice(GREETINGS_LIST)}, {ctx.message.author.mention}!')
 
-    @commands.command(aliases=["c", "кот", "Кот", "Cat", "🐱"], help="command_cat_info")
+    @commands.command(aliases=["c", "кот", "Кот", "Cat", "🐱"], description="command_cat_description")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def cat(self, ctx):
         async with ctx.channel.typing():
@@ -96,7 +105,7 @@ class BaseCommands(commands.Cog):
             embed.set_image(url=response[0]["url"])
         await ctx.reply(embed=embed)
 
-    @commands.command(aliases=["d", "собака", "Пёс", "Собака", "Dog", "🐶"], help="command_dog_info")
+    @commands.command(aliases=["d", "собака", "Пёс", "Собака", "Dog", "🐶"], description="command_dog_description")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def dog(self, ctx):
         async with ctx.channel.typing():
@@ -107,7 +116,7 @@ class BaseCommands(commands.Cog):
             embed.set_image(url=response[0]["url"])
         await ctx.reply(embed=embed)
 
-    @commands.command(aliases=["лиса", "лис", "Fox", "Лис", "Лиса", "🦊"], help="command_fox_info")
+    @commands.command(aliases=["лиса", "лис", "Fox", "Лис", "Лиса", "🦊"], description="command_fox_description")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def fox(self, ctx):
         async with ctx.channel.typing():

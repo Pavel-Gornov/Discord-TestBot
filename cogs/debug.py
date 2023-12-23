@@ -17,20 +17,23 @@ class Test(commands.Cog):
     async def on_ready(self):
         print(f"Модуль {COG_NAME} успешно загружен!")
 
-    @commands.command(aliases=["шестерни", "модули", "расширения"])
+    @commands.command(aliases=["шестерни", "модули", "расширения"], hidden=True)
     @commands.is_owner()
     async def cog(self, ctx):
         await ctx.reply(self.bot.cogs)
 
-    @commands.slash_command(name='тест', description='Что-то делает.')
-    async def test_(self, ctx):
-        await ctx.respond('Успешный тест!')
-
-    @commands.command(aliases=["пинг"])
+    @commands.command(aliases=["пинг"], hidden=True)
     async def ping(self, ctx):
         await ctx.send(f"Pong! {round(self.bot.latency * 1000)}ms")
 
-    @commands.slash_command(name='очистка', description='Очищает сообщения, помеченные, как "офф-топ"')
+    @commands.slash_command(name='тест', description='Что-то делает.')
+    async def test_(self, ctx: discord.ApplicationContext):
+        m = await ctx.respond('Успешный тест!')
+        m = await m.original_response()
+        await m.add_reaction("✅")
+
+    @commands.slash_command(name='очистка', description='Очищает сообщения, помеченные, как "офф-топ"',
+                            guild_ids=[1076117733428711434, 1055895511359574108])
     @discord.commands.default_permissions(administrator=True)
     @discord.commands.guild_only()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -40,7 +43,7 @@ class Test(commands.Cog):
         channel = channel if channel else ctx.channel
         msgs = list()
         async for x in channel.history(limit=number):
-            if ((x.content.startswith("//") or x.content.startswith("(("))
+            if ((x.content.startswith("//") or x.content.startswith("((") or x.content.endswith("//"))
                     and "⭐" not in [i.emoji for i in x.reactions]
                     and datetime.datetime.now(x.created_at.tzinfo) - x.created_at <= datetime.timedelta(
                         days=14) and not x.pinned):

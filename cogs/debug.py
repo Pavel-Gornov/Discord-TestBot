@@ -33,7 +33,7 @@ class Test(commands.Cog):
         await m.add_reaction("✅")
 
     @commands.slash_command(name='очистка', description='Очищает сообщения, помеченные, как "офф-топ"',
-                            guild_ids=[1076117733428711434, 1055895511359574108])
+                            guild_ids=[1076117733428711434, 1055895511359574108, 1144672479399391393])
     @discord.commands.default_permissions(administrator=True)
     @discord.commands.guild_only()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -44,7 +44,7 @@ class Test(commands.Cog):
         msgs = list()
         async for x in channel.history(limit=number):
             if ((x.content.startswith("//") or x.content.startswith("((") or x.content.endswith("//"))
-                    and "⭐" not in [i.emoji for i in x.reactions]
+                    #and "⭐" not in [i.emoji for i in x.reactions]
                     and datetime.datetime.now(x.created_at.tzinfo) - x.created_at <= datetime.timedelta(
                         days=14) and not x.pinned):
                 msgs.append(x)

@@ -132,7 +132,7 @@ async def on_ready():
 
 
 @bot.event
-async def on_message(message):
+async def on_message(message: discord.Message):
     if message.author != bot.user:
         if message.content.startswith("t:") and message.author.id in whitelist:
             if message.reference:
@@ -144,7 +144,7 @@ async def on_message(message):
 
 
 @bot.event
-async def on_command_error(ctx, error):
+async def on_command_error(ctx: commands.Context, error: commands.CommandError):
     if isinstance(error, commands.CommandOnCooldown):
         embed = discord.Embed(color=COLOR_CODES["error"], title=f'Произошла ошибка!',
                               description=f"Вы сможете использовать эту команду повторно через {round(error.retry_after, 2)} секунд")
@@ -164,7 +164,7 @@ async def on_command_error(ctx, error):
 
 
 @bot.event
-async def on_application_command_error(ctx, error):
+async def on_application_command_error(ctx: discord.ApplicationContext, error: discord.DiscordException):
     if isinstance(error, commands.CommandOnCooldown):
         embed = discord.Embed(color=COLOR_CODES["error"], title=f'Произошла ошибка!',
                               description=f"Вы сможете использовать эту команду повторно через {round(error.retry_after, 2)} секунд")
@@ -177,7 +177,7 @@ async def on_application_command_error(ctx, error):
                    description=LOCAL["command/_avatar_description"][DEFAULT_LANG],
                    name_localizations=LOCAL["command_avatar_name"],
                    description_localizations=LOCAL["command/_avatar_description"])
-async def avatar_(ctx, member: Option(discord.Member, name=LOCAL["command/_avatar_option_member_name"][DEFAULT_LANG],
+async def avatar_(ctx: discord.ApplicationContext, member: Option(discord.Member, name=LOCAL["command/_avatar_option_member_name"][DEFAULT_LANG],
                                       description=LOCAL["command/_avatar_option_member_description"][DEFAULT_LANG],
                                       name_localizations=LOCAL["command/_avatar_option_member_name"],
                                       description_localizations=LOCAL["command/_avatar_option_member_description"],
@@ -203,7 +203,7 @@ async def avatar_(ctx, member: Option(discord.Member, name=LOCAL["command/_avata
                    description=LOCAL["command/_dice_description"][DEFAULT_LANG],
                    name_localizations=LOCAL["command/_dice_name"],
                    description_localizations=LOCAL["command/_dice_description"])
-async def dice_(ctx, sides: Option(int, name=LOCAL["command/_dice_option_sides_name"][DEFAULT_LANG],
+async def dice_(ctx: discord.ApplicationContext, sides: Option(int, name=LOCAL["command/_dice_option_sides_name"][DEFAULT_LANG],
                                    description=LOCAL["command/_dice_option_sides_description"][DEFAULT_LANG],
                                    name_localizations=LOCAL["command/_dice_option_sides_name"],
                                    description_localizations=LOCAL["command/_dice_option_sides_description"],
@@ -350,7 +350,7 @@ async def help_(ctx: discord.ApplicationContext):
 
 
 @bot.message_command(name="Аватар пользователя")
-async def avatar_msg_command(ctx, message):
+async def avatar_msg_command(ctx: discord.ApplicationContext, message: discord.Message):
     user = message.author
     embed = discord.Embed(color=COLOR_CODES["bot"], title=f'Аватар {user}', description=f"id: {user.id}")
     embed.set_image(url=user.avatar.url)

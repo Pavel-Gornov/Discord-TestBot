@@ -9,7 +9,8 @@ from discord.ext import commands
 import discord
 from storage import *
 
-bot = commands.Bot(command_prefix=commands.when_mentioned_or(SETTINGS['prefix']), intents=discord.Intents.all())
+SETTINGS: final = {'token': TOKEN, 'bot': BOT_NAME, 'id': BOT_ID, 'prefix': 'd|'}
+BOT_ICON_URL: final = "https://media.discordapp.net/attachments/1055896512053399623/1150820899231109271/-.png"
 
 
 class CustomHelpCommand(commands.HelpCommand):
@@ -117,6 +118,13 @@ class CustomHelpCommand(commands.HelpCommand):
         return LOCAL["help_command_not_found"][language].format(string)
 
 
+bot = commands.Bot(command_prefix=commands.when_mentioned_or(SETTINGS['prefix']), intents=discord.Intents.all(),
+                   help_command=CustomHelpCommand(
+                       command_attrs={'name': "help", 'aliases': ["helpme", "помощь", "хелп"],
+                                      'help': "command_help_examples", 'description': "command_help_description",
+                                      'brief': "command_help_args"}))
+
+
 @bot.event
 async def on_connect():
     if bot.auto_sync_commands:
@@ -177,11 +185,12 @@ async def on_application_command_error(ctx: discord.ApplicationContext, error: d
                    description=LOCAL["command/_avatar_description"][DEFAULT_LANG],
                    name_localizations=LOCAL["command_avatar_name"],
                    description_localizations=LOCAL["command/_avatar_description"])
-async def avatar_(ctx: discord.ApplicationContext, member: Option(discord.Member, name=LOCAL["command/_avatar_option_member_name"][DEFAULT_LANG],
-                                      description=LOCAL["command/_avatar_option_member_description"][DEFAULT_LANG],
-                                      name_localizations=LOCAL["command/_avatar_option_member_name"],
-                                      description_localizations=LOCAL["command/_avatar_option_member_description"],
-                                      required=False),
+async def avatar_(ctx: discord.ApplicationContext,
+                  member: Option(discord.Member, name=LOCAL["command/_avatar_option_member_name"][DEFAULT_LANG],
+                                 description=LOCAL["command/_avatar_option_member_description"][DEFAULT_LANG],
+                                 name_localizations=LOCAL["command/_avatar_option_member_name"],
+                                 description_localizations=LOCAL["command/_avatar_option_member_description"],
+                                 required=False),
                   ephemeral: Option(str, name=LOCAL["command/_avatar_option_ephemeral_name"][DEFAULT_LANG],
                                     description=LOCAL["command/_avatar_option_ephemeral_description"][DEFAULT_LANG],
                                     name_localizations=LOCAL["command/_avatar_option_ephemeral_name"],
@@ -203,11 +212,12 @@ async def avatar_(ctx: discord.ApplicationContext, member: Option(discord.Member
                    description=LOCAL["command/_dice_description"][DEFAULT_LANG],
                    name_localizations=LOCAL["command/_dice_name"],
                    description_localizations=LOCAL["command/_dice_description"])
-async def dice_(ctx: discord.ApplicationContext, sides: Option(int, name=LOCAL["command/_dice_option_sides_name"][DEFAULT_LANG],
-                                   description=LOCAL["command/_dice_option_sides_description"][DEFAULT_LANG],
-                                   name_localizations=LOCAL["command/_dice_option_sides_name"],
-                                   description_localizations=LOCAL["command/_dice_option_sides_description"],
-                                   required=False, default=6, min_value=1)):
+async def dice_(ctx: discord.ApplicationContext,
+                sides: Option(int, name=LOCAL["command/_dice_option_sides_name"][DEFAULT_LANG],
+                              description=LOCAL["command/_dice_option_sides_description"][DEFAULT_LANG],
+                              name_localizations=LOCAL["command/_dice_option_sides_name"],
+                              description_localizations=LOCAL["command/_dice_option_sides_description"],
+                              required=False, default=6, min_value=1)):
     await ctx.respond(random.randint(1, sides))
 
 
@@ -280,10 +290,7 @@ async def vote_(ctx: discord.ApplicationContext,
                       ephemeral=True)
 
 
-@bot.slash_command(name=LOCAL["command/_server_name"][DEFAULT_LANG],
-                   description=LOCAL["command/_server_description"][DEFAULT_LANG],
-                   name_localizations=LOCAL["command/_server_name"],
-                   description_localizations=LOCAL["command/_server_description"])
+@bot.slash_command(name='сервер', description="Информация о сервере. (в разработке)")
 @discord.commands.guild_only()
 @commands.cooldown(1, 5, commands.BucketType.user)
 async def server_(ctx: discord.ApplicationContext):
@@ -361,14 +368,7 @@ def main():
     for f in os.listdir("./cogs"):
         if f.endswith("py") and not f == "economy.py":
             bot.load_extension("cogs." + f[:-3])
-    bot.help_command = CustomHelpCommand(
-        command_attrs={'name': "help", 'aliases': ["helpme", "помощь", "хелп"],
-                       'help': "command_help_examples",
-                       'description': "command_help_description",
-                       'brief': "command_help_args"})
     bot.run(SETTINGS['token'])
-    with open("economy.json", mode="w", encoding="utf-8") as f:
-        f.write(json.dumps(economy_data, indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":

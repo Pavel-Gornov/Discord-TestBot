@@ -1,12 +1,9 @@
 import datetime
-
-from discord.ext import commands
-
-from lib.utils import makeDSTimestamp
-from storage import *
 import discord
+from discord.ext import commands
+from lib.utils import makeDSTimestamp
 
-COG_NAME: final = "отладки"
+COG_NAME = "отладки"
 
 
 class Test(commands.Cog):
@@ -44,7 +41,7 @@ class Test(commands.Cog):
         msgs = list()
         async for x in channel.history(limit=number):
             if ((x.content.startswith("//") or x.content.startswith("((") or x.content.endswith("//"))
-                    #and "⭐" not in [i.emoji for i in x.reactions]
+                    # and "⭐" not in [i.emoji for i in x.reactions]
                     and datetime.datetime.now(x.created_at.tzinfo) - x.created_at <= datetime.timedelta(
                         days=14) and not x.pinned):
                 msgs.append(x)

@@ -1,20 +1,33 @@
-import multiprocessing
-from typing import Callable
+import json
 import datetime
-from storage import DEFAULT_LANG, LANGS
-
+from settings import DEFAULT_LANG, LANGS
+from enum import Enum
 import discord
 
 
-def run_until(seconds: int, func: Callable, *args):
-    """Run a function until timeout in seconds reached."""
-    with multiprocessing.Pool(processes=2) as pool:
-        result = pool.apply_async(func, [*args])
-        try:
-            result.get(timeout=seconds)
-            return result.get()
-        except multiprocessing.TimeoutError:
-            pass
+class Color(Enum):
+    BOT = 0xFFF7ED
+    SUCCESS = 0x66bb6a
+    ERROR = 0xf03431
+
+
+def load_local():
+    with open("locale.json", mode="r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+LOCAL = load_local()
+
+
+def tbsl(string_id: str, local=None):
+    if local is None:
+        return LOCAL.get(string_id, None)
+    if string_id in LOCAL.keys():
+        s = LOCAL.get(string_id)
+        if local in s.keys():
+            return s.get(local, "")
+        return s.get(DEFAULT_LANG, "")
+    return ""
 
 
 def makeDSTimestamp(year, month, day, hour, minute, second, timezone, mode):

@@ -1,10 +1,19 @@
-from discord.ext import commands
+import json
 import discord
-from storage import *
 import datetime
 import math
+from lib.utils import Color
+from discord.ext import commands
 
-COG_NAME: final = "экономики"
+
+def economy():
+    with open("economy.json", mode="r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+economy_data = economy()
+
+COG_NAME = "экономики"
 ECONOMY_EMOJIS = {"p1-1": "<:p1_1:1180851390462050354>",
                   "p1-0": "<:p1_0:1180851387714773043>",
                   "p2-1": "<:p2_1:1180851382501244998>",
@@ -299,7 +308,7 @@ class Economy(commands.Cog):
             print(e)
         await ctx.respond(embed=discord.Embed(title="Успех!",
                                               description=f"Предприятие {name} было успешно зарегистрировано. Владелец: {ctx.author.mention}",
-                                              color=COLOR_CODES["success"]))
+                                              color=Color.SUCCESS.value["success"]))
 
 
 class Confirm(discord.ui.View):

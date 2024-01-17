@@ -24,14 +24,17 @@ class Test(commands.Cog):
         await ctx.send(f"Pong! {round(self.bot.latency * 1000)}ms")
 
     @commands.slash_command(name='тест', description='Что-то делает.')
+    @commands.is_owner()
     async def test_(self, ctx: discord.ApplicationContext):
         m = await ctx.respond('Успешный тест!')
         m = await m.original_response()
         await m.add_reaction("✅")
 
     @commands.slash_command(name='очистка', description='Очищает сообщения, помеченные, как "офф-топ"',
-                            guild_ids=[1076117733428711434, 1055895511359574108, 1144672479399391393])
-    @discord.commands.default_permissions(administrator=True)
+                            guild_ids=None
+                            #[1076117733428711434, 1055895511359574108, 1144672479399391393]
+                            )
+    @discord.commands.default_permissions(manage_messages=True, read_message_history=True)
     @discord.commands.guild_only()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def clear_(self, ctx: discord.ApplicationContext,
@@ -50,6 +53,7 @@ class Test(commands.Cog):
             await channel.delete_messages(msgs[i:i + 100], reason="Очистка")
 
     @commands.slash_command(name="метка-времени", description="Что-то делает")
+    @commands.is_owner()
     async def time_(self, ctx, year: discord.Option(int, description="Год для даты", required=False) = 1970,
                     month: discord.Option(int, description="Номер месяца года", required=False) = 1,
                     day: discord.Option(int, description="Номер дня месяца", required=False) = 1,

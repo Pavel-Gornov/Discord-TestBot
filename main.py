@@ -3,6 +3,7 @@ import random
 import aiohttp
 import discord
 from lib.utils import get_guild_lang, is_emoji, tbsl, Color
+#from lib.MongoDB import MongoDB
 from discord.ext import commands
 from settings import *
 from Token import *
@@ -40,7 +41,9 @@ class CustomHelpCommand(commands.HelpCommand):
             if command_signatures:
                 cog_name = getattr(cog, "qualified_name", None)
                 if cog_name:
-                    cog_name = tbsl("cogs", cog.qualified_name)[language]
+                    cog_name = tbsl("cogs", cog.qualified_name)
+                    if isinstance(cog_name, dict):
+                        cog_name = cog_name[language]
                 else:
                     cog_name = tbsl("help_no_category", language)
                 embed.add_field(name=f"{cog_name}:", value="\n\t".join(command_signatures), inline=False)
@@ -363,6 +366,7 @@ async def avatar_msg_command(ctx: discord.ApplicationContext, message: discord.M
 
 
 def main():
+    # db = MongoDB(db_name="TestBotDB", collection="server_settings")
     for f in os.listdir("./cogs"):
         if f.endswith("py") and not f == "economy.py":
             bot.load_extension("cogs." + f[:-3])

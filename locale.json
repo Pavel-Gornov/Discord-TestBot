@@ -74,9 +74,14 @@
 
   "command_calculate_info": {"en-US": "Calculates mathematical expressions of varying levels of complexity. The command is able to work with complex numbers and more. ~~Please don't break it.~~", "ru": "Вычисляет математические выражения разного уровня сложности. Команда способна работать с комплексными числами и не только. ~~Пожалуйста, не ломайте её.~~"},
 
+  "command_image_description": {"en-US": "Command for generating pictures based on a text query. The input is in any language, the size can be specified in the format \"{Width}x{Height}\" (Size of 1 side cannot be more than 1024), the style via \"style:title\"", "ru": "Команда для генерации картинок на основе текстового запроса. Ввод осуществляется на любом языке, размер можно указать в формате \"{Ширина}x{Высота}\" (Размер 1 стороны не может быть больше 1024), стиль через \"стиль:название\""},
+  "command_image_examples": {"en-US": ". . .", "ru": "Пушистый кот в очках\nЯблоко 1024x576\nБелка со скрипкой Стиль:Кандинский"},
+  "command_image_args": {"en-US": "[prompt]", "ru": "[запрос]"},
+
   "cogs": {
     "BaseCommands": {"en-US": "Base Commands", "ru": "Основные команды"},
-    "Test": {"en-US": "Test Commands", "ru": "Тестовые команды"}
+    "Test": {"en-US": "Test Commands", "ru": "Тестовые команды"},
+    "KandinskyAPI": {"en-US": "Kandinsky API", "ru": "API Кандинского"}
   },
   "option_choice_yes": {"en-US": "Yes", "ru": "Да"},
   "option_choice_no": {"en-US": "No", "ru": "Нет"}

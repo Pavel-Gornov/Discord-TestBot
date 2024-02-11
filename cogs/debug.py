@@ -6,6 +6,14 @@ from lib.utils import makeDSTimestamp
 COG_NAME = "отладки"
 
 
+def number_declension(n: int, string_id: str = None) -> str:
+    if n == 1 or str(n)[-1] == "1":
+        return f"{n} сообщение"
+    elif n in (2, 3, 4) or str(n)[-1] in ("2", "3", "4"):
+        return f"{n} сообщения"
+    return f"{n} сообщений"
+
+
 class Test(commands.Cog):
     def __init__(self, bot: discord.Bot):
         self.bot = bot
@@ -26,13 +34,21 @@ class Test(commands.Cog):
     @commands.slash_command(name='тест', description='Что-то делает.')
     @commands.is_owner()
     async def test_(self, ctx: discord.ApplicationContext):
-        m = await ctx.respond('Успешный тест!')
+        channel = ctx.channel
+        msgs = list()
+        async for x in channel.history(limit=200):
+            if ((x.content.startswith("//") or x.content.startswith("((") or x.content.endswith(
+                    "//")) or x.content.startswith(">>") and not x.pinned):
+                msgs.append(x)
+        m = await ctx.respond(f"Успешный тест!\nБудет удалено {number_declension(len(msgs))}.", delete_after=10)
         m = await m.original_response()
         await m.add_reaction("✅")
+        for i in msgs[::-1]:
+            await i.delete(reason="Очистка")
 
     @commands.slash_command(name='очистка', description='Очищает сообщения, помеченные, как "офф-топ"',
                             guild_ids=None
-                            #[1076117733428711434, 1055895511359574108, 1144672479399391393]
+                            # [1076117733428711434, 1055895511359574108, 1144672479399391393]
                             )
     @discord.commands.default_permissions(manage_messages=True, read_message_history=True)
     @discord.commands.guild_only()
@@ -43,13 +59,13 @@ class Test(commands.Cog):
         channel = channel if channel else ctx.channel
         msgs = list()
         async for x in channel.history(limit=number):
-            if ((x.content.startswith("//") or x.content.startswith("((") or x.content.endswith("//"))
-                    # and "⭐" not in [i.emoji for i in x.reactions]
+            if ((x.content.startswith("//") or x.content.startswith("((") or x.content.endswith("//")) or x.content.startswith(">>")
                     and datetime.datetime.now(x.created_at.tzinfo) - x.created_at <= datetime.timedelta(
                         days=14) and not x.pinned):
                 msgs.append(x)
-        await ctx.respond(f"Будет удалено {len(msgs)} сообщений.", delete_after=10)
+        await ctx.respond(f"Будет удалено {number_declension(len(msgs))}.", delete_after=10)
         for i in range(0, len(msgs), 100):
+            print(msgs)
             await channel.delete_messages(msgs[i:i + 100], reason="Очистка")
 
     @commands.slash_command(name="метка-времени", description="Что-то делает")

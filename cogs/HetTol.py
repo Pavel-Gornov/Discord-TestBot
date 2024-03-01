@@ -7,7 +7,7 @@ class PingCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.bind((socket.gethostname(), 3000))
+        self.s.bind((socket.gethostname(), 3001))
         self.s.listen()
         self.listen_ping.start()
 

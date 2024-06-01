@@ -1,0 +1,8 @@
+{
+  "LANGUAGES": ["ru", "en-US"],
+  "DEFAULT_LANGUAGE": "ru",
+  "PREFIX": "|",
+  "TOKEN": "",
+  "COGS": ["base.py", "debug.py", "kandinsky.py"],
+  "DB": true
+}

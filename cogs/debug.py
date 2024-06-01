@@ -60,12 +60,10 @@ class Test(commands.Cog):
         msgs = list()
         async for x in channel.history(limit=number):
             if ((x.content.startswith("//") or x.content.startswith("((") or x.content.endswith("//")) or x.content.startswith(">>")
-                    and datetime.datetime.now(x.created_at.tzinfo) - x.created_at <= datetime.timedelta(
-                        days=14) and not x.pinned):
+                    and datetime.datetime.now(x.created_at.tzinfo) - x.created_at <= datetime.timedelta(days=14) and not x.pinned):
                 msgs.append(x)
         await ctx.respond(f"Будет удалено {number_declension(len(msgs))}.", delete_after=10)
         for i in range(0, len(msgs), 100):
-            print(msgs)
             await channel.delete_messages(msgs[i:i + 100], reason="Очистка")
 
     @commands.slash_command(name="метка-времени", description="Что-то делает")

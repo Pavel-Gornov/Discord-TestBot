@@ -1,33 +1,72 @@
 import json
 import datetime
-from settings import DEFAULT_LANG, LANGS
-from enum import Enum
+import sqlite3
 import discord
 
 
-class Color(Enum):
+class Config:
+    def __init__(self):
+        self.data = {"LANGUAGES": ("ru", "en-US"), "DEFAULT_LANGUAGE": "ru", "PREFIX": "|", "TOKEN": "", "COGS": ()}
+
+    def __getattr__(self, item):
+        return self.data.get(item, None)
+
+    def load(self, filename: str):
+        with open(filename, mode="r", encoding="utf-8") as f:
+            self.data = json.load(f)
+
+
+CONFIG = Config()
+
+
+class TBStrings:
+    def __init__(self):
+        self.data = None
+
+    def __getitem__(self, item: str) -> dict:
+        return self.data.get(item)
+
+    def __call__(self, string_id: str, language: str = None) -> str:
+        s = self.data.get(string_id, None)
+        if s:
+            if language in s.keys():
+                return s.get(language)
+            return s.get(CONFIG.DEFAULT_LANGUAGE)
+        return ""
+
+    def load(self, filename: str):
+        with open(filename, mode="r", encoding="utf-8") as f:
+            self.data = json.load(f)
+
+
+TBS = TBStrings()
+
+
+class DBManager:
+    def __init__(self):
+        self.con: sqlite3.Connection = None
+        self.cur: sqlite3.Cursor = None
+
+    def get_server_settings(self, server_id: int):
+        self.cur.execute(f"SELECT * FROM settings WHERE id = {server_id}")
+        result = self.cur.fetchone()
+        return result
+
+    def change_server_settings(self, server_id):
+        ...
+
+    def load(self, filename: str):
+        self.con = sqlite3.connect(filename)
+        self.cur = self.con.cursor()
+
+
+DB = DBManager()
+
+
+class Color:
     BOT = 0xFFF7ED
     SUCCESS = 0x66bb6a
     ERROR = 0xf03431
-
-
-def load_local():
-    with open("locale.json", mode="r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-LOCAL = load_local()
-
-
-def tbsl(string_id: str, local=None):
-    if local is None:
-        return LOCAL.get(string_id, None)
-    if string_id in LOCAL.keys():
-        s = LOCAL.get(string_id)
-        if local in s.keys():
-            return s.get(local, "")
-        return s.get(DEFAULT_LANG, "")
-    return ""
 
 
 def makeDSTimestamp(year, month, day, hour, minute, second, timezone, mode):
@@ -38,9 +77,14 @@ def makeDSTimestamp(year, month, day, hour, minute, second, timezone, mode):
 
 # TODO: Добавить настройки языка сервера и использовать их в этой функции.
 def get_guild_lang(guild: discord.Guild) -> str:
-    if not guild or guild.preferred_locale not in LANGS:
-        return DEFAULT_LANG
-    return guild.preferred_locale
+    if guild:
+        if DB:
+            s = DB.get_server_settings(guild.id)
+            if s and s[1] is not None:
+                return s[1]
+        elif guild.preferred_locale in CONFIG.LANGUAGES:
+            return guild.preferred_locale
+    return CONFIG.DEFAULT_LANGUAGE
 
 
 def is_emoji(string):

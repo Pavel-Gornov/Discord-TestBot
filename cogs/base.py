@@ -3,7 +3,7 @@ import discord
 import aiohttp
 from typing import Optional
 from discord.ext import commands
-from lib.utils import get_guild_lang, tbsl, Color
+from lib.utils import get_guild_lang, TBS, Color
 
 COG_NAME = "основных команд"
 GREETINGS_LIST = ('Привет', 'Приветствую', 'Рад видеть вас')
@@ -35,33 +35,31 @@ class BaseCommands(commands.Cog):
             guild = ctx.guild
 
         bot_count = len([m for m in guild.members if m.bot])
-        embed = discord.Embed(title=tbsl("server_title", language).format(guild.name),
-                              description=tbsl("server_description", language).format(
-                                  guild.description if guild.description else tbsl('description_none', language)),
-                              colour=Color.BOT.value)
+        embed = discord.Embed(title=TBS("server_title", language).format(guild.name),
+                              description=TBS("server_description", language).format(
+                                  guild.description if guild.description else TBS('description_none', language)),
+                              colour=Color.BOT)
         embed.set_thumbnail(url=guild.icon.url)
-        embed.add_field(name=tbsl("server_members_name", language),
-                        value=tbsl("server_members_value", language).format(guild.member_count,
+        embed.add_field(name=TBS("server_members_name", language),
+                        value=TBS("server_members_value", language).format(guild.member_count,
                                                                             guild.member_count - bot_count, bot_count))
-        temp = round(guild.filesize_limit / 1024 ** 2)
-        embed.add_field(name=tbsl("server_miscellaneous_name", language),
-                        value=tbsl("server_miscellaneous_value", language).format(guild.premium_tier,
+        embed.add_field(name=TBS("server_miscellaneous_name", language),
+                        value=TBS("server_miscellaneous_value", language).format(guild.premium_tier,
                                                                                   guild.premium_subscription_count,
-                                                                                  tbsl("server_size_large",
+                                                                                  TBS("server_size_large",
                                                                                        language) if guild.large else
-                                                                                  tbsl("server_size_small", language),
-                                                                                  25 if temp == 8 else temp))
-        embed.add_field(name=tbsl("server_channels_name", language),
-                        value=tbsl("server_channels_value", language).format(
+                                                                                  TBS("server_size_small", language), round(guild.filesize_limit / 1024 ** 2)))
+        embed.add_field(name=TBS("server_channels_name", language),
+                        value=TBS("server_channels_value", language).format(
                             len(guild.channels) - len(guild.categories), len(guild.text_channels),
                             len(guild.voice_channels), len(guild.forum_channels),
                             len([c for c in guild.text_channels if c.news])))
-        embed.add_field(name=tbsl("server_owner_name", language), value=f"{guild.owner.mention}")
-        embed.add_field(name=tbsl("server_verification_level_name", language),
-                        value=f"{tbsl(f'verification_{str(guild.verification_level)}', language)}")
-        embed.add_field(name=tbsl("server_created_at_name", language),
+        embed.add_field(name=TBS("server_owner_name", language), value=f"{guild.owner.mention}")
+        embed.add_field(name=TBS("server_verification_level_name", language),
+                        value=f"{TBS(f'verification_{str(guild.verification_level)}', language)}")
+        embed.add_field(name=TBS("server_created_at_name", language),
                         value=f"<t:{int(guild.created_at.timestamp())}:D>\n<t:{int(guild.created_at.timestamp())}:R>")
-        embed.set_footer(text=tbsl("server_footer", language).format(guild.id, guild.preferred_locale))
+        embed.set_footer(text=TBS("server_footer", language).format(guild.id, guild.preferred_locale))
 
         await ctx.reply(embed=embed)
 
@@ -78,7 +76,7 @@ class BaseCommands(commands.Cog):
     async def avatar(self, ctx: commands.Context, user: Optional[discord.User]):
         if user is None:
             user = ctx.message.author
-        embed = discord.Embed(color=Color.BOT.value, title=f'Аватар {user}', description=f"id: {user.id}")
+        embed = discord.Embed(color=Color.BOT, title=f'Аватар {user}', description=f"id: {user.id}")
         embed.set_image(url=user.avatar.url)
         await ctx.reply(embed=embed)
 
@@ -107,7 +105,7 @@ class BaseCommands(commands.Cog):
             async with aiohttp.ClientSession() as session:
                 async with session.get("https://api.thecatapi.com/v1/images/search?mime_types=jpg,png") as response:
                     response = await response.json()
-            embed = discord.Embed(color=Color.BOT.value, title="Случайный Кот")
+            embed = discord.Embed(color=Color.BOT, title="Случайный Кот")
             embed.set_image(url=response[0]["url"])
         await ctx.reply(embed=embed)
 
@@ -118,7 +116,7 @@ class BaseCommands(commands.Cog):
             async with aiohttp.ClientSession() as session:
                 async with session.get("https://api.thedogapi.com/v1/images/search?mime_types=jpg,png") as response:
                     response = await response.json()
-            embed = discord.Embed(color=Color.BOT.value, title="Случайная Собака")
+            embed = discord.Embed(color=Color.BOT, title="Случайная Собака")
             embed.set_image(url=response[0]["url"])
         await ctx.reply(embed=embed)
 
@@ -129,7 +127,7 @@ class BaseCommands(commands.Cog):
             async with aiohttp.ClientSession() as session:
                 async with session.get("https://randomfox.ca/floof") as response:
                     response = await response.json()
-            embed = discord.Embed(color=Color.BOT.value, title="Случайная Лиса")
+            embed = discord.Embed(color=Color.BOT, title="Случайная Лиса")
             embed.set_image(url=response["image"])
         await ctx.reply(embed=embed)
 

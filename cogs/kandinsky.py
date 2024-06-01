@@ -88,7 +88,7 @@ class KandinskyAPI(commands.Cog):
 
             embed = discord.Embed(title="Начинаю обработку...",
                                   description=f"**Запрос:** {query.text}\n**Размеры изображения:** {query.size}",
-                                  color=Color.BOT.value)
+                                  color=Color.BOT)
             embed.add_field(name="Запрос на обработку от:", value=ctx.author.mention)
             m = await ctx.reply(embed=embed)
             async with aiohttp.ClientSession("https://api-key.fusionbrain.ai") as session:
@@ -100,11 +100,11 @@ class KandinskyAPI(commands.Cog):
             else:
                 await m.edit(
                     embed=discord.Embed(title="Произошла ошибка", description="Не удалось запустить обработку.",
-                                        color=Color.ERROR.value))
+                                        color=Color.ERROR))
         else:
             await ctx.reply(embed=discord.Embed(title="Ошибка аргумента",
                                                 description="Аргументы для запроса указаны не верно или отсутствуют.",
-                                                color=Color.ERROR.value))
+                                                color=Color.ERROR))
 
     @tasks.loop(seconds=30)
     async def check_requests(self):
@@ -121,7 +121,7 @@ class KandinskyAPI(commands.Cog):
                             await v[0].reply(f"{v[1].mention}, Генерация завершена!", file=discord.File(filename="generated.png", fp=file_content))
                         elif response_json["status"] == "FAIL":
                             self.request_queue.pop(k)
-                            await v[0].edit(embed=discord.Embed(title="Ошибка создания", description="Что-то пошло не так.", color=Color.ERROR.value))
+                            await v[0].edit(embed=discord.Embed(title="Ошибка создания", description="Что-то пошло не так.", color=Color.ERROR))
 
 
 def setup(bot):

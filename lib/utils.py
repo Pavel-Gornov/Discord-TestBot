@@ -66,7 +66,13 @@ class DBManager:
                     temp.append(f'{k} = {v}')
             self.cur.execute(f"UPDATE settings SET {', '.join(temp)} WHERE id = {server_id}")
         else:
-            self.cur.execute(f"INSERT {', '.join(changes.keys())} INTO settings VALUES {', '.join(changes.values())}")
+            temp = list()
+            for v in changes.values():
+                if isinstance(v, str):
+                    temp.append(f'"{v}"')
+                else:
+                    temp.append(v)
+            self.cur.execute(f"INSERT INTO settings (id, {', '.join(changes.keys())})  VALUES ({server_id}, {', '.join(temp)})")
         self.con.commit()
 
     def load(self, filename: str):

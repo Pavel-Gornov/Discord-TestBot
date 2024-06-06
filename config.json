@@ -3,6 +3,7 @@
   "DEFAULT_LANGUAGE": "ru",
   "PREFIX": "|",
   "TOKEN": "",
+  "TESTING_GUILDS": null,
   "COGS": ["base.py", "debug.py", "kandinsky.py"],
   "DB": true
 }

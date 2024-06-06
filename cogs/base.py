@@ -2,7 +2,9 @@ import random
 import discord
 import aiohttp
 from typing import Optional
+
 from discord.ext import commands
+from lib.ui import SettingsView
 from lib.utils import get_guild_lang, TBS, Color
 
 COG_NAME = "основных команд"
@@ -25,9 +27,19 @@ class BaseCommands(commands.Cog):
     async def on_ready(self):
         print(f"Модуль {COG_NAME} успешно загружен!")
 
+    @commands.command(aliases=["настройки", "параметры", "config"]
+        #, description=None, help=None, brief=None\
+    )
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def settings(self, ctx: commands.Context):
+        language = get_guild_lang(ctx.guild)
+        embed = discord.Embed(title="Настройки", description="Что Вы хотите изменить?", colour=Color.BOT)
+        embed.add_field(name="**Общее**", value=f"Язык: {language}")
+        view = SettingsView(ctx.author.id, language)
+        await ctx.reply(embed=embed, view=view)
+
     @commands.command(aliases=["сервер", "guild", "серв"], description="command_server_description",
                       help="command_server_examples", brief="command_server_args")
-    @discord.commands.guild_only()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def server(self, ctx: commands.Context, *, guild: commands.GuildConverter = None):
         language = get_guild_lang(ctx.guild)
@@ -42,13 +54,15 @@ class BaseCommands(commands.Cog):
         embed.set_thumbnail(url=guild.icon.url)
         embed.add_field(name=TBS("server_members_name", language),
                         value=TBS("server_members_value", language).format(guild.member_count,
-                                                                            guild.member_count - bot_count, bot_count))
+                                                                           guild.member_count - bot_count, bot_count))
         embed.add_field(name=TBS("server_miscellaneous_name", language),
                         value=TBS("server_miscellaneous_value", language).format(guild.premium_tier,
-                                                                                  guild.premium_subscription_count,
-                                                                                  TBS("server_size_large",
-                                                                                       language) if guild.large else
-                                                                                  TBS("server_size_small", language), round(guild.filesize_limit / 1024 ** 2)))
+                                                                                 guild.premium_subscription_count,
+                                                                                 TBS("server_size_large",
+                                                                                     language) if guild.large else
+                                                                                 TBS("server_size_small", language),
+                                                                                 round(
+                                                                                     guild.filesize_limit / 1024 ** 2)))
         embed.add_field(name=TBS("server_channels_name", language),
                         value=TBS("server_channels_value", language).format(
                             len(guild.channels) - len(guild.categories), len(guild.text_channels),

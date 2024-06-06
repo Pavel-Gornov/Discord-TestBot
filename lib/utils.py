@@ -1,6 +1,8 @@
 import json
 import datetime
 import sqlite3
+from typing import Callable
+
 import discord
 
 
@@ -52,8 +54,20 @@ class DBManager:
         result = self.cur.fetchone()
         return result
 
-    def change_server_settings(self, server_id):
-        ...
+    def change_server_settings(self, server_id, **changes):
+        self.cur.execute(f"SELECT * FROM settings WHERE id = {server_id}")
+        result = self.cur.fetchone()
+        if result:
+            temp = list()
+            for k, v in changes.items():
+                if isinstance(v, str):
+                    temp.append(f'{k} = "{v}"')
+                else:
+                    temp.append(f'{k} = {v}')
+            self.cur.execute(f"UPDATE settings SET {', '.join(temp)} WHERE id = {server_id}")
+        else:
+            self.cur.execute(f"INSERT {', '.join(changes.keys())} INTO settings VALUES {', '.join(changes.values())}")
+        self.con.commit()
 
     def load(self, filename: str):
         self.con = sqlite3.connect(filename)
@@ -110,3 +124,14 @@ def is_emoji(string):
         return False
     else:
         return False
+
+
+def alpha() -> Callable:
+    def inner(command: Callable):
+        if isinstance(command, discord.ApplicationCommand):
+            command.guild_ids = CONFIG.TESTING_GUILDS
+        else:
+            command.__guild_ids__ = CONFIG.TESTING_GUILDS
+        return command
+
+    return inner
